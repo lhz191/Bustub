@@ -17,9 +17,9 @@ namespace bustub {
 /// A special type that will block the move constructor and move assignment operator. Used in TrieStore tests.
 class MoveBlocked {
  public:
-  explicit MoveBlocked(std::future<int> wait) : wait_(std::move(wait)) {}
+  MoveBlocked(std::future<int> wait) : wait_(std::move(wait)) {}
 
-  MoveBlocked(const MoveBlocked &) = delete;
+  MoveBlocked(const MoveBlocked &);
   MoveBlocked(MoveBlocked &&that) noexcept {
     if (!that.waited_) {
       that.wait_.get();
@@ -77,7 +77,7 @@ template <class T>
 class TrieNodeWithValue : public TrieNode {
  public:
   // Create a trie node with no children and a value.
-  explicit TrieNodeWithValue(std::shared_ptr<T> value) : value_(std::move(value)) { this->is_value_node_ = true; }
+  TrieNodeWithValue(std::shared_ptr<T> value) : value_(std::move(value)) { this->is_value_node_ = true; }
 
   // Create a trie node with children and a value.
   TrieNodeWithValue(std::map<char, std::shared_ptr<const TrieNode>> children, std::shared_ptr<T> value)
@@ -134,3 +134,5 @@ class Trie {
 };
 
 }  // namespace bustub
+
+
