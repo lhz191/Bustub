@@ -12,7 +12,7 @@ using uid_t = int64_t;
 template <typename T>
 class ORSet {
  public:
-  ORSet() = default;
+  ORSet()=default;
 
   /**
    * @brief Checks if an element is in the set.
@@ -60,6 +60,12 @@ class ORSet {
 
  private:
   // TODO(student): Add your private memeber variables to represent ORSet.
+  std::vector<std::pair<T, uid_t>> e;
+  std::vector<std::pair<T, uid_t>> t;
+
+  inline auto GenerateUid() -> uid_t { return next_uid_++; }
+  uid_t next_uid_= 0;
+
 };
 
 }  // namespace bustub

@@ -15,9 +15,9 @@ class ORSetDriver;
 template <typename T>
 class ORSetNode {
  public:
-  ORSetNode() = delete;
+  ORSetNode()=delete;
 
-  explicit ORSetNode(ORSetDriver<T> *driver, size_t node_id, size_t n)
+  ORSetNode(ORSetDriver<T> *driver, size_t node_id, size_t n)
       : driver_(driver), node_id_(node_id), peer_size_(n), last_read_version_(n, 0) {}
 
   /**
@@ -124,7 +124,7 @@ class ORSetDriver {
   /** @brief  List of saved copies of ORSet. */
   std::vector<ORSet<T>> saved_copies_;
 
-  /** @brief latest version number of each node */
+  /** @brief latest xversion number of each node */
   std::vector<uint32_t> version_counter_;
 
   /** @brief Monotonically increasing unique id for the elements. */
