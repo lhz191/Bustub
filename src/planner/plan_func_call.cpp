@@ -29,7 +29,34 @@ auto Planner::GetFuncCallFromFactory(const std::string &func_name, std::vector<A
   // 1. check if the parsed function name is "lower" or "upper".
   // 2. verify the number of args (should be 1), refer to the test cases for when you should throw an `Exception`.
   // 3. return a `StringExpression` std::shared_ptr.
-  throw Exception(fmt::format("func call {} not supported in planner yet", func_name));
+  if(func_name=="lower"){
+       if(args.size()!=1)
+       {
+        throw Exception("Incorrect number of arguments for lower function.");
+       }
+       else
+       {
+          // if(args[0]->GetChildAt(0)->GetReturnType().IsNumeric())
+          // {
+          // throw Exception("Incorrect number of arguments for lower function."),
+          // }
+          return std::make_shared<StringExpression>(args[0], StringExpressionType::Lower);
+       }
+  }
+  else if(func_name=="upper"){
+       if(args.size()!=1)
+       {
+        throw Exception("Incorrect number of arguments for upper function.");
+       }
+       else
+       {
+        return std::make_shared<StringExpression>(args[0], StringExpressionType::Upper);
+       }
+  }
+  else {
+    // 处理未知的函数名称
+    throw Exception("Unknown function: "+func_name);
 }
+    }
 
 }  // namespace bustub

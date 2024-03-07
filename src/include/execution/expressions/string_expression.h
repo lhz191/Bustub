@@ -41,13 +41,66 @@ class StringExpression : public AbstractExpression {
       : AbstractExpression({std::move(arg)}, Column{"<val>", TypeId::VARCHAR, 256 /* hardcode max length */}),
         expr_type_{expr_type} {
     if (GetChildAt(0)->GetReturnType().GetType() != TypeId::VARCHAR) {
-      BUSTUB_ENSURE(GetChildAt(0)->GetReturnType().GetType() == TypeId::VARCHAR, "unexpected arg");
+      // BUSTUB_ENSURE(GetChildAt(0)->GetReturnType().GetType() == TypeId::VARCHAR, "unexpected arg");
+      throw Exception("Incorrect category of arguments for function.");
     }
   }
 
   auto Compute(const std::string &val) const -> std::string {
-    // TODO(student): implement upper / lower.
-    return {};
+    // std::string s;
+    // s.reserve(val.size());
+    // switch(this->expr_type_)
+    // {
+    //   case StringExpressionType::Lower:
+    //     for(std::string::size_type i=0;i<val.size();i++)
+    //     {
+    //       s[i]=std::tolower(val[i]);
+    //     }
+    //     break;
+    //   case StringExpressionType::Upper:
+    //     for(std::string::size_type i=0;i<val.size();i++)
+    //     {
+    //       s[i]=std::toupper(val[i]);
+    //     } 
+    //     break;
+
+    // }
+    // return s;
+    std::string s;
+    switch(this->expr_type_)
+    {
+        case StringExpressionType::Lower:
+            for(char c : val)
+            {
+                s.push_back(std::tolower(static_cast<unsigned char>(c)));
+            }
+            break;
+        case StringExpressionType::Upper:
+            for(char c : val)
+            {
+                s.push_back(std::toupper(static_cast<unsigned char>(c)));
+            } 
+            break;
+    }
+    return s;
+    // std::string result;
+    // result.reserve(val.size());
+    // switch(this->expr_type_)
+    // {
+    //     case StringExpressionType::Lower:
+    //         for(char c : val)
+    //         {
+    //             result.push_back(std::tolower(static_cast<unsigned char>(c)));
+    //         }
+    //         break;
+    //     case StringExpressionType::Upper:
+    //         for(char c : val)
+    //         {
+    //             result.push_back(std::toupper(static_cast<unsigned char>(c)));
+    //         } 
+    //         break;
+    // }
+    // return result;
   }
 
   auto Evaluate(const Tuple *tuple, const Schema &schema) const -> Value override {
