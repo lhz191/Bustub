@@ -53,6 +53,7 @@ void ORSet<T>::Merge(const ORSet<T> &other) {
   //     }
   //   }
   // }
+  
   for(auto it=other.t.begin();it!=other.t.end();it++)
   {
     T value=(*it).first;

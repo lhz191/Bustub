@@ -66,6 +66,7 @@ class ORSet {
   inline auto GenerateUid() -> uid_t { return next_uid_++; }
   uid_t next_uid_= 0;
 
+
 };
 
 }  // namespace bustub
