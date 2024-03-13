@@ -26,14 +26,50 @@ namespace bustub {
 enum class AccessType { Unknown = 0, Lookup, Scan, Index };
 
 class LRUKNode {
- private:
+ public:
   /** History of last seen K timestamps of this page. Least recent timestamp stored in front. */
   // Remove maybe_unused if you start using them. Feel free to change the member variables as you want.
 
-  [[maybe_unused]] std::list<size_t> history_;
-  [[maybe_unused]] size_t k_;
-  [[maybe_unused]] frame_id_t fid_;
-  [[maybe_unused]] bool is_evictable_{false};
+    std::list<size_t> history_;
+    size_t k_;
+    frame_id_t fid_;
+    bool is_evictable_{false};
+ public:
+    bool operator>(LRUKNode &other)
+    {
+      if((this->history_.size()>=k_ )&& other.history_.size()>=k_)
+      {
+          auto it1 = history_.begin();
+          std::advance(it1, k_-1);
+          auto it2 = other.history_.begin();
+          std::advance(it2, k_-1);
+          size_t temp1=this->history_.front() - *it1;
+          size_t temp2=other.history_.front() - *it2;
+          if(temp1>temp2)
+          {
+            return true;
+          }
+          else return false;
+      }
+      else if((this->history_.size()>=k_ )&& other.history_.size()<k_)
+      {
+        return false;
+      }
+      else if((this->history_.size()<k_ )&& other.history_.size()>=k_)
+      {
+        return true;
+      }
+      else
+      {
+          size_t temp1=this->history_.back();
+          size_t temp2=other.history_.back();
+          if(temp1<temp2)//这里淘汰最早一个访问的两者中最小（也就是最早的），所以时间小的，kstance大
+          {
+            return true;
+          }
+          else return false;
+      }
+    }
 };
 
 /**
@@ -150,12 +186,13 @@ class LRUKReplacer {
  private:
   // TODO(student): implement me! You can replace these member variables as you like.
   // Remove maybe_unused if you start using them.
-  [[maybe_unused]] std::unordered_map<frame_id_t, LRUKNode> node_store_;
-  [[maybe_unused]] size_t current_timestamp_{0};
-  [[maybe_unused]] size_t curr_size_{0};
-  [[maybe_unused]] size_t replacer_size_;
-  [[maybe_unused]] size_t k_;
-  [[maybe_unused]] std::mutex latch_;
+
+  std::unordered_map<frame_id_t, LRUKNode> node_store_;
+  size_t current_timestamp_{0};
+  size_t curr_size_{0};
+  size_t replacer_size_;
+  size_t k_;
+  std::mutex latch_;
 };
 
 }  // namespace bustub

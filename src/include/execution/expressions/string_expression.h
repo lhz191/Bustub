@@ -33,7 +33,7 @@ namespace bustub {
 enum class StringExpressionType { Lower, Upper };
 
 /**
- * StringExpression represents two expressions being computed.
+ * StringExpression represents two expressions being computed.g
  */
 class StringExpression : public AbstractExpression {
  public:
