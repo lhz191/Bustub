@@ -35,44 +35,15 @@ BufferPoolManager::BufferPoolManager(size_t pool_size, DiskManager *disk_manager
 
 BufferPoolManager::~BufferPoolManager() { delete[] pages_; }
 
-
-// auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * 
-// {
-//   this->latch_.lock();
-//   if(!free_list_.empty())
-//   {
-//     page_id_t newid=this->AllocatePage();
-//     frame_id_t temp=0;
-//     temp=this->free_list_.front();
-//     free_list_.pop_front();
-//     this->page_table_.emplace(newid, temp);
-//     Page& new_page=pages_[newid];
-//     new_page.is_dirty_=false;
-//     new_page.pin_count_=0;
-//     new_page.page_id_=newid;
-//     *page_id=newid;
-//     this->disk_scheduler_->disk_manager_ ->WritePage(newid,this->pages_[newid].data_);
-//     latch_.unlock();
-//     return &new_page;
-//   }
-//   return nullptr;
-// }
 auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * 
 {
   this->latch_.lock();
-  std::cout<<this->free_list_.empty()<<std::endl;
-  std::cout<<this->free_list_.empty()<<std::endl;
   if(this->free_list_.empty()==true)
   {
     int flag=1;
     auto it=this->page_table_.begin();
     for(;it!=this->page_table_.end();it++)
     {
-      // if(this->pages_[it->first].pin_count_==0)//这里从下文看可以用replacer的evitable来判断，但是我感觉pin和evitable是一样的
-      // {
-      //   flag=0;
-      //   break;
-      // }
       if(this->pages_[it->first].pin_count_==0)//这里从下文看可以用replacer的evitable来判断，但是我感觉pin和evitable是一样的
       {
         flag=0;
@@ -82,17 +53,13 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page *
     if(flag==1)
     {
       this->latch_.unlock();
-      // std::cout<<"fanhui"<<std::endl;
       return nullptr;
     }
   }
   page_id_t newid=this->AllocatePage();
-  // std::cout<<" _____________"<<newid<<"_______________________________"<<std::endl;
-  // std::cout<<" _____________"<<newid<<"_______________________________"<<std::endl;
   frame_id_t temp=0;
   if(this->free_list_.empty()!=true)
   {
-    std::cout<<" free_list_.front();"<<free_list_.front()<<std::endl;
     temp=this->free_list_.front();
     free_list_.pop_front();
     this->page_table_.emplace(newid, temp);
@@ -109,37 +76,24 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page *
     *page_id=newid;
     // this->disk_scheduler_->disk_manager_ ->WritePage(newid,this->pages_[newid].data_);
     latch_.unlock();
-    std::cout<<"shi"<<&pages_[newid]<<std::endl;
-    std::cout<<"shi"<<&pages_[newid]<<std::endl;
     return &pages_[newid];
   }
   else
   {
     if (this->replacer_->Evict(&temp) != 1) {
       this->latch_.unlock();
-      std::cout<<"fanhui3"<<std::endl;
       return nullptr; // 无法创建新页面
     }
-    std::cout<<"temp"<<temp<<std::endl;
     page_id_t temp_id;
-    std::cout<<"tempframe"<<page_table_[0]<<std::endl;
-    std::cout<<"tempframe"<<page_table_[1]<<std::endl;
     auto pair=page_table_.begin();
     for (;pair!=page_table_.end();pair++) {
-      std::cout<<"pair_.first"<<pair->first<<std::endl;
-       std::cout<<"pair_.second"<<pair->second<<std::endl;
-        std::cout<<"temp"<<temp<<std::endl;
     if (pair->second==temp) {
-      std::cout<<"yes"<<std::endl;
       temp_id=pair->first;//fan hui page_id
       break;
     }
     }
     Page* temp_page=nullptr;
-    std::cout<<"temp_id"<<temp_id<<std::endl;
     temp_page=&pages_[temp_id];
-    std::cout<<"temp_page"<<temp_page<<std::endl;
-    std::cout<<"temp_page"<<temp_page->page_id_<<std::endl;
     if(pages_[temp_id].is_dirty_==true)
     {
       this->latch_.unlock();
@@ -150,23 +104,14 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page *
       this->replacer_->SetEvictable(temp,false);
       this->replacer_->RecordAccess(temp);
       temp_page->page_id_=newid;
-      // delete &pages_[temp_id];
-      // temp_id=INVALID_PAGE_ID;
-      // pages_.erase(temp_id);buzhidaoyaobuyaochuli
       Page& new_page=pages_[newid];
-      // new_page=*new Page();
       new_page.is_dirty_=false;
-      // new_page.pin_count_=0;
       new_page.pin_count_=1;
-      // this->page_table_.erase(temp_id);
       this->page_table_.emplace(newid, temp);
-      // this->replacer_->node_store_[temp].is_evictable_=false;
-      this->replacer_->node_store_.erase(temp);
+      this->replacer_->node_store_.erase(temp);//important!!!
       *page_id=newid;
       this->disk_scheduler_->disk_manager_ ->WritePage(newid,this->pages_[newid].data_);
       latch_.unlock();
-          std::cout<<"shi"<<&pages_[newid]<<std::endl;
-    std::cout<<"shi"<<&pages_[newid]<<std::endl;
       return &pages_[newid];
   }
 
@@ -238,6 +183,7 @@ auto BufferPoolManager::FetchPage(page_id_t page_id, [[maybe_unused]] AccessType
     this->disk_scheduler_->disk_manager_ ->ReadPage(temp_id,this->pages_[temp_id].data_);
       this->replacer_->SetEvictable(temp,false);
       this->replacer_->RecordAccess(temp);
+      this->replacer_->node_store_.erase(temp);
       pages_[temp_id].pin_count_++;
       page_id=temp_id;
       latch_.unlock();
@@ -265,13 +211,11 @@ auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty, [[maybe_unus
   auto it=this->page_table_.find(page_id);
   if(it==page_table_.end())
   {
-    std::cout<<"enter0"<<std::endl;
     latch_.unlock();
     return false;
   }
   else if(pages_[page_id].pin_count_==0)
   {
-    std::cout<<"enter2"<<std::endl;
     frame_id_t frame1=this->page_table_[page_id];
     this->replacer_->node_store_[frame1].is_evictable_=true;
     latch_.unlock();
@@ -279,11 +223,9 @@ auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty, [[maybe_unus
   }
   else
   {
-    std::cout<<"enter1"<<std::endl;
     pages_[page_id].pin_count_=0;
     frame_id_t frame1=this->page_table_[page_id];
 
-    std::cout<<frame1<<std::endl;
     this->replacer_->curr_size_++;
     this->replacer_->RecordAccess(frame1);
     this->replacer_->node_store_[frame1].is_evictable_=true;
@@ -326,7 +268,36 @@ void BufferPoolManager::FlushAllPages()
   }
 }
 
-auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool { return false; }
+auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool 
+{
+  latch_.lock();
+  auto it=page_table_.find(page_id);
+  if(it==page_table_.end())
+  {
+    latch_.unlock();
+    return true;
+  }
+  else
+  {
+    if(pages_[it->first].pin_count_!=0)
+    {
+    latch_.unlock();
+    return false;
+    }
+    else
+    {
+      free_list_.push_back(it->second);
+      this->replacer_->node_store_[it->second].is_evictable_=false;
+      pages_[it->first].pin_count_=1;
+      pages_[it->first].ResetMemory();
+      DeallocatePage(it->first);
+      page_table_.erase(it->first);
+      latch_.unlock();
+      return true;
+    }
+  }
+  return true; 
+}
 
 auto BufferPoolManager::AllocatePage() -> page_id_t { return next_page_id_++; }
 
