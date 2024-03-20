@@ -38,7 +38,25 @@ class Page {
 
   /** Default destructor. */
   ~Page() { delete[] data_; }
-
+  Page& operator=(const Page& other) {
+    this->rwlatch_.WLock();
+        if (this != &other) { // 检查是否为自我赋值
+            // 复制数据
+            memcpy(data_, other.data_, BUSTUB_PAGE_SIZE);
+            page_id_ = other.page_id_;
+            pin_count_ = other.pin_count_;
+            is_dirty_ = other.is_dirty_;
+        }
+        this->rwlatch_.WUnlock();
+        return *this;
+    }
+// Page(const Page& other) 
+//         : page_id_(other.page_id_), 
+//           pin_count_(other.pin_count_), 
+//           is_dirty_(other.is_dirty_) {
+//         // 拷贝数据
+//         std::memcpy(data_, other.data_, BUSTUB_PAGE_SIZE);
+//     }
   /** @return the actual data contained within this page */
   inline auto GetData() -> char * { return data_; }
 
@@ -69,7 +87,7 @@ class Page {
   /** Sets the page LSN. */
   inline void SetLSN(lsn_t lsn) { memcpy(GetData() + OFFSET_LSN, &lsn, sizeof(lsn_t)); }
 
- protected:
+
   static_assert(sizeof(page_id_t) == 4);
   static_assert(sizeof(lsn_t) == 4);
 
@@ -77,7 +95,7 @@ class Page {
   static constexpr size_t OFFSET_PAGE_START = 0;
   static constexpr size_t OFFSET_LSN = 4;
 
- private:
+ public:
   /** Zeroes out the data that is held within the page. */
   inline void ResetMemory() { memset(data_, OFFSET_PAGE_START, BUSTUB_PAGE_SIZE); }
 

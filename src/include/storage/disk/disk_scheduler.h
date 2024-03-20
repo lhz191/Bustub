@@ -83,7 +83,7 @@ class DiskScheduler {
    */
   auto CreatePromise() -> DiskSchedulerPromise { return {}; };
 
- private:
+public:
   /** Pointer to the disk manager. */
   DiskManager *disk_manager_ __attribute__((__unused__));
   /** A shared queue to concurrently schedule and process requests. When the DiskScheduler's destructor is called,

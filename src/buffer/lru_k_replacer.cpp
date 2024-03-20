@@ -25,6 +25,7 @@ auto LRUKReplacer::Evict(frame_id_t *frame_id) -> bool
     latch_.lock();
     if(this->curr_size_==0)
     {
+        // std::cout<<"step1"<<std::endl;
         latch_.unlock();
         return false;
     }
@@ -41,6 +42,7 @@ auto LRUKReplacer::Evict(frame_id_t *frame_id) -> bool
             }
         }
     }
+    // std::cout<<"kid"<<kid<<std::endl;
     // std::cout<<kid<<std::endl;
     // std::cout<<"是否可改:"<<node_store_[kid].is_evictable_<<std::endl;
     // std::cout<<"k_now:"<<node_store_[kid].history_.size()<<std::endl;
@@ -50,11 +52,14 @@ auto LRUKReplacer::Evict(frame_id_t *frame_id) -> bool
         this->curr_size_--;
         node_store_[kid].history_.clear();
         this->node_store_.erase(kid);
+        // std::cout<<node_store_[4];
+        // std::cout<<"step2"<<std::endl;
         latch_.unlock();
         return true;
     }
     else
     {
+        // std::cout<<"step3"<<std::endl;
         latch_.unlock();
         return false;
     }
