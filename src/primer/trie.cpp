@@ -6,41 +6,32 @@ namespace bustub {
 
 template <class T>
 auto Trie::Get(std::string_view key) const -> const T * {
-     std::shared_ptr<const TrieNode> x=this->root_;
+  std::shared_ptr<const TrieNode> x = this->root_;
   //  std::map<char, std::shared_ptr<const TrieNode>> children_;
-  for(char ch:key)
-  {
-    if(x==nullptr)
-    {
+  for (char ch : key) {
+    if (x == nullptr) {
       return nullptr;
     }
-    auto it=x->children_.find(ch);
-    if(it==x->children_.end())//找不到
+    auto it = x->children_.find(ch);
+    if (it == x->children_.end())  //找不到
     {
       return nullptr;
-    }
-    else{
-    x=it->second;
+    } else {
+      x = it->second;
     }
   }
-  if(x->is_value_node_==true)
-  {
-        // 如果是值节点，尝试将当前节点转换为 TrieNodeWithValue<T> 指针
-        auto newnode = dynamic_cast<const TrieNodeWithValue<T>*>(x.get());
-        if (newnode != nullptr)
-        {
-            // 如果转换成功，返回值的普通指针
-            return newnode->value_.get();//!!!
-        }
-        else
-        {
-            // 如果转换失败，说明类型不匹配，返回 nullptr
-            return nullptr;
-        }
-  }
-  else
-  {
-        return nullptr;
+  if (x->is_value_node_ == true) {
+    // 如果是值节点，尝试将当前节点转换为 TrieNodeWithValue<T> 指针
+    auto newnode = dynamic_cast<const TrieNodeWithValue<T> *>(x.get());
+    if (newnode != nullptr) {
+      // 如果转换成功，返回值的普通指针
+      return newnode->value_.get();  //!!!
+    } else {
+      // 如果转换失败，说明类型不匹配，返回 nullptr
+      return nullptr;
+    }
+  } else {
+    return nullptr;
   }
   // You should walk through the trie to find the node corresponding to the key. If the node doesn't exist, return
   // nullptr. After you find the node, you should use `dynamic_cast` to cast it to `const TrieNodeWithValue<T> *`. If
@@ -52,42 +43,38 @@ template <class T>
 auto Trie::Put(std::string_view key, T value) const -> Trie {
   // Note that `T` might be a non-copyable type. Always use `std::move` when creating `shared_ptr` on that value.
   // throw NotImplementedException("Trie::Put is not implemented.");
-  std::unique_ptr<TrieNode> root1=root_->Clone();
-  std::shared_ptr<TrieNode> curnode=std::move(root1);
+  std::unique_ptr<TrieNode> root1 = root_->Clone();
+  std::shared_ptr<TrieNode> curnode = std::move(root1);
   std::shared_ptr<TrieNode> parent(curnode);
 
   //  std::map<char, std::shared_ptr<const TrieNode>> children_;
-  if(curnode==nullptr)//如果是空树的话
+  if (curnode == nullptr)  //如果是空树的话
   {
-        std::shared_ptr<TrieNode> newroot=std::make_shared<TrieNode>();
-        curnode=newroot;
-        parent=newroot;
+    std::shared_ptr<TrieNode> newroot = std::make_shared<TrieNode>();
+    curnode = newroot;
+    parent = newroot;
   }
-  char lastch='a';
-  for(char ch:key)
-  {
-    auto it=curnode->children_.find(ch);
-    if(it==curnode->children_.end())//找不到
+  char lastch = 'a';
+  for (char ch : key) {
+    auto it = curnode->children_.find(ch);
+    if (it == curnode->children_.end())  //找不到
     {
-      std::shared_ptr<TrieNode> newnode=std::make_shared<TrieNode>();
+      std::shared_ptr<TrieNode> newnode = std::make_shared<TrieNode>();
       // curnode->children_.emplace(std::make_pair(ch, newnode));
-      curnode->children_.insert({ch,newnode});
-      parent=curnode;
-      curnode=newnode;
-      lastch=ch;
-    }
-    else
-    {
-      parent=curnode;
-      curnode=std::const_pointer_cast<bustub::TrieNode>(it->second);
-      lastch=ch;
+      curnode->children_.insert({ch, newnode});
+      parent = curnode;
+      curnode = newnode;
+      lastch = ch;
+    } else {
+      parent = curnode;
+      curnode = std::const_pointer_cast<bustub::TrieNode>(it->second);
+      lastch = ch;
     }
   }
-  if(curnode->is_value_node_==false)
-  {
+  if (curnode->is_value_node_ == false) {
     //  std::map<char, std::shared_ptr<const TrieNode>> children_;
     // std::shared_ptr<TrieNodeWithValue<T>> newnode = std::make_shared<TrieNodeWithValue<T>>(std::move(value));
-    std::shared_ptr<T> value_ptr=std::make_shared<T>(value);
+    std::shared_ptr<T> value_ptr = std::make_shared<T>(value);
     TrieNodeWithValue newnode(value_ptr);
     std::shared_ptr<TrieNodeWithValue<T>> temp = std::make_shared<TrieNodeWithValue<T>>(newnode);
     std::shared_ptr<TrieNode> newnode1 = std::dynamic_pointer_cast<TrieNodeWithValue<T>>(temp);
@@ -101,9 +88,7 @@ auto Trie::Put(std::string_view key, T value) const -> Trie {
     parent->children_.emplace(char(lastch), newnode1);
 
     return Trie(std::move(root1));
-  }
-  else
-  {
+  } else {
     return Trie(std::move(root1));
   }
   // You should walk through the trie and create new nodes if necessary. If the node corresponding to the key already
@@ -112,33 +97,25 @@ auto Trie::Put(std::string_view key, T value) const -> Trie {
 
 auto Trie::Remove(std::string_view key) const -> Trie {
   // throw NotImplementedException("Trie::Remove is not implemented.");
-  std::unique_ptr<TrieNode> root1=root_->Clone();
-  std::shared_ptr<TrieNode> curnode=std::move(root1);
+  std::unique_ptr<TrieNode> root1 = root_->Clone();
+  std::shared_ptr<TrieNode> curnode = std::move(root1);
   std::shared_ptr<TrieNode> parent(curnode);
-  if(curnode==nullptr)
-  {
+  if (curnode == nullptr) {
     return Trie(std::move(root1));
   }
-  for(char ch:key)
-  {
-    auto it=curnode->children_.find(ch);
-    if(it==curnode->children_.end())
-    {
+  for (char ch : key) {
+    auto it = curnode->children_.find(ch);
+    if (it == curnode->children_.end()) {
       return Trie(std::move(root1));
-    }
-    else
-    {
-      parent=curnode;
-      curnode=std::const_pointer_cast<bustub::TrieNode>(it->second);
+    } else {
+      parent = curnode;
+      curnode = std::const_pointer_cast<bustub::TrieNode>(it->second);
     }
   }
-  if(curnode->is_value_node_==false)
-  {
+  if (curnode->is_value_node_ == false) {
     return Trie(std::move(root1));
-  }
-  else
-  {
-    curnode->is_value_node_=false;
+  } else {
+    curnode->is_value_node_ = false;
     return Trie(std::move(root1));
   }
 

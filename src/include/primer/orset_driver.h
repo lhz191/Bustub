@@ -15,7 +15,7 @@ class ORSetDriver;
 template <typename T>
 class ORSetNode {
  public:
-  ORSetNode()=delete;
+  ORSetNode() = delete;
 
   ORSetNode(ORSetDriver<T> *driver, size_t node_id, size_t n)
       : driver_(driver), node_id_(node_id), peer_size_(n), last_read_version_(n, 0) {}

@@ -30,46 +30,38 @@ class LRUKNode {
   /** History of last seen K timestamps of this page. Least recent timestamp stored in front. */
   // Remove maybe_unused if you start using them. Feel free to change the member variables as you want.
 
-    std::list<size_t> history_;
-    size_t k_;
-    frame_id_t fid_;
-    bool is_evictable_{false};
+  std::list<size_t> history_;
+  size_t k_;
+  frame_id_t fid_;
+  bool is_evictable_{false};
+
  public:
-    bool operator>(LRUKNode &other)
-    {
-      if((this->history_.size()>=k_ )&& other.history_.size()>=k_)
-      {
-          auto it1 = history_.begin();
-          std::advance(it1, k_-1);
-          auto it2 = other.history_.begin();
-          std::advance(it2, k_-1);
-          size_t temp1=this->history_.front() - *it1;
-          size_t temp2=other.history_.front() - *it2;
-          if(temp1>temp2)
-          {
-            return true;
-          }
-          else return false;
-      }
-      else if((this->history_.size()>=k_ )&& other.history_.size()<k_)
-      {
+  bool operator>(LRUKNode &other) {
+    if ((this->history_.size() >= k_) && other.history_.size() >= k_) {
+      auto it1 = history_.begin();
+      std::advance(it1, k_ - 1);
+      auto it2 = other.history_.begin();
+      std::advance(it2, k_ - 1);
+      size_t temp1 = this->history_.front() - *it1;
+      size_t temp2 = other.history_.front() - *it2;
+      if (temp1 > temp2) {
+        return true;
+      } else
         return false;
-      }
-      else if((this->history_.size()<k_ )&& other.history_.size()>=k_)
+    } else if ((this->history_.size() >= k_) && other.history_.size() < k_) {
+      return false;
+    } else if ((this->history_.size() < k_) && other.history_.size() >= k_) {
+      return true;
+    } else {
+      size_t temp1 = this->history_.back();
+      size_t temp2 = other.history_.back();
+      if (temp1 < temp2)  //这里淘汰最早一个访问的两者中最小（也就是最早的），所以时间小的，kstance大
       {
         return true;
-      }
-      else
-      {
-          size_t temp1=this->history_.back();
-          size_t temp2=other.history_.back();
-          if(temp1<temp2)//这里淘汰最早一个访问的两者中最小（也就是最早的），所以时间小的，kstance大
-          {
-            return true;
-          }
-          else return false;
-      }
+      } else
+        return false;
     }
+  }
 };
 
 /**

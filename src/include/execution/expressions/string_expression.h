@@ -61,26 +61,23 @@ class StringExpression : public AbstractExpression {
     //     for(std::string::size_type i=0;i<val.size();i++)
     //     {
     //       s[i]=std::toupper(val[i]);
-    //     } 
+    //     }
     //     break;
 
     // }
     // return s;
     std::string s;
-    switch(this->expr_type_)
-    {
-        case StringExpressionType::Lower:
-            for(char c : val)
-            {
-                s.push_back(std::tolower(static_cast<unsigned char>(c)));
-            }
-            break;
-        case StringExpressionType::Upper:
-            for(char c : val)
-            {
-                s.push_back(std::toupper(static_cast<unsigned char>(c)));
-            } 
-            break;
+    switch (this->expr_type_) {
+      case StringExpressionType::Lower:
+        for (char c : val) {
+          s.push_back(std::tolower(static_cast<unsigned char>(c)));
+        }
+        break;
+      case StringExpressionType::Upper:
+        for (char c : val) {
+          s.push_back(std::toupper(static_cast<unsigned char>(c)));
+        }
+        break;
     }
     return s;
     // std::string result;
@@ -97,7 +94,7 @@ class StringExpression : public AbstractExpression {
     //         for(char c : val)
     //         {
     //             result.push_back(std::toupper(static_cast<unsigned char>(c)));
-    //         } 
+    //         }
     //         break;
     // }
     // return result;
