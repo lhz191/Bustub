@@ -63,11 +63,10 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page *
     temp=this->free_list_.front();
     free_list_.pop_front();
     this->page_table_.emplace(newid, temp);
-    // Page& new_page=pages_[newid];
-    // std::shared_ptr<Page> new_page = std::make_shared<Page>();
-    // pages_[newid]=new Page();
     Page &new_page=pages_[newid];
-    new_page=*new Page();
+    // new_page=*new Page();
+    // Page &new_page=*new Page();
+    // new_page=pages_[newid];
     new_page.is_dirty_=false;
     new_page.pin_count_=1;
     this->replacer_->SetEvictable(temp,false);
