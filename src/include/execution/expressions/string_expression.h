@@ -47,25 +47,6 @@ class StringExpression : public AbstractExpression {
   }
 
   auto Compute(const std::string &val) const -> std::string {
-    // std::string s;
-    // s.reserve(val.size());
-    // switch(this->expr_type_)
-    // {
-    //   case StringExpressionType::Lower:
-    //     for(std::string::size_type i=0;i<val.size();i++)
-    //     {
-    //       s[i]=std::tolower(val[i]);
-    //     }
-    //     break;
-    //   case StringExpressionType::Upper:
-    //     for(std::string::size_type i=0;i<val.size();i++)
-    //     {
-    //       s[i]=std::toupper(val[i]);
-    //     }
-    //     break;
-
-    // }
-    // return s;
     std::string s;
     switch (this->expr_type_) {
       case StringExpressionType::Lower:

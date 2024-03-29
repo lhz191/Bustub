@@ -41,7 +41,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
     auto it = this->page_table_.begin();
     for (; it != this->page_table_.end(); it++) {
       if (this->pages_[it->first].pin_count_ ==
-          0)  //这里从下文看可以用replacer的evitable来判断，但是我感觉pin和evitable是一样的
+          0) 
       {
         flag = 0;
         break;
@@ -61,7 +61,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
     Page &new_page = pages_[newid];
     // new_page=*new Page();
     // Page &new_page=*new Page();
-    // new_page=pages_[newid];
+    // new_page=pages_[newid];W
     new_page.is_dirty_ = false;
     new_page.pin_count_ = 1;
     this->replacer_->SetEvictable(temp, false);
@@ -95,7 +95,9 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
     this->replacer_->SetEvictable(temp, false);
     this->replacer_->RecordAccess(temp);
     temp_page->page_id_ = newid;
+    // pages_[temp_id].pin_count_++;
     Page &new_page = pages_[newid];
+    this->page_table_.erase(temp_id);
     new_page.is_dirty_ = false;
     new_page.pin_count_ = 1;
     this->page_table_.emplace(newid, temp);
@@ -111,16 +113,6 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
 
 auto BufferPoolManager::FetchPage(page_id_t page_id, [[maybe_unused]] AccessType access_type) -> Page * {
   this->latch_.lock();
-  // int flag=1;
-  // auto it=this->page_table_.begin();
-  // for(;it!=this->page_table_.end();it++)
-  // {
-  //   if(this->pages_[it->first].pin_count_==0)//这里从下文看可以用replacer的evitable来判断，但是我感觉pin和evitable是一样的
-  //   {
-  //     flag=0;
-  //     break;
-  //   }
-  // }
   frame_id_t frame1 = 0;
   auto it2 = this->page_table_.find(page_id);
   if (it2 == page_table_.end()) {
@@ -208,20 +200,20 @@ auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty, [[maybe_unus
 }
 
 auto BufferPoolManager::FlushPage(page_id_t page_id) -> bool {
-  // this->latch_.lock();
+  this->latch_.lock();
   if (page_id == INVALID_PAGE_ID) {
-    // this->latch_.unlock();
+    this->latch_.unlock();
     return false;
   }
   // std::unordered_map<page_id_t, frame_id_t> page_table_;用于跟踪缓冲池页面的页表
   auto it = this->page_table_.find(page_id);
   if (it == this->page_table_.end()) {
-    // latch_.unlock();
+    latch_.unlock();
     return false;
   } else {
     this->disk_scheduler_->disk_manager_->WritePage(page_id, this->pages_[page_id].data_);
     this->pages_[page_id].is_dirty_ = false;
-    // latch_.unlock();
+    latch_.unlock();
     return true;
   }
 }
@@ -259,9 +251,8 @@ auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool {
 
 auto BufferPoolManager::AllocatePage() -> page_id_t { return next_page_id_++; }
 
-auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard 
-{
-    this->latch_.lock();
+auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard {
+  this->latch_.lock();
   // int flag=1;
   // auto it=this->page_table_.begin();
   // for(;it!=this->page_table_.end();it++)
@@ -291,12 +282,12 @@ auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard
       this->disk_scheduler_->disk_manager_->ReadPage(temp_id, this->pages_[temp_id].data_);
       page_id = temp_id;
       this->latch_.unlock();
-      return BasicPageGuard(this,&pages_[temp_id]);
+      return BasicPageGuard(this, &pages_[temp_id]);
     } else {
       frame_id_t temp = 0;
       if (this->replacer_->Evict(&temp) != 1) {
         this->latch_.unlock();
-        return BasicPageGuard(); // 无法fetch页面
+        return BasicPageGuard();  // 无法fetch页面
       }
       page_id_t temp_id;
       for (auto &pair : this->page_table_) {
@@ -318,7 +309,7 @@ auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard
         pages_[temp_id].pin_count_++;
         page_id = temp_id;
         latch_.unlock();
-        return BasicPageGuard(this,&pages_[temp_id]);
+        return BasicPageGuard(this, &pages_[temp_id]);
       }
     }
   } else {
@@ -328,14 +319,13 @@ auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard
     this->replacer_->RecordAccess(it2->second);
     pages_[page_id].pin_count_++;
     latch_.unlock();
-    return BasicPageGuard(this,&pages_[page_id]);
+    return BasicPageGuard(this, &pages_[page_id]);
   }
   return BasicPageGuard();
 }
 
-auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard 
-{
-    this->latch_.lock();
+auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
+  this->latch_.lock();
   // int flag=1;
   // auto it=this->page_table_.begin();
   // for(;it!=this->page_table_.end();it++)
@@ -365,12 +355,12 @@ auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard
       this->disk_scheduler_->disk_manager_->ReadPage(temp_id, this->pages_[temp_id].data_);
       page_id = temp_id;
       this->latch_.unlock();
-      return BasicPageGuard(this,&pages_[temp_id]).UpgradeRead() ;
+      return BasicPageGuard(this, &pages_[temp_id]).UpgradeRead();
     } else {
       frame_id_t temp = 0;
       if (this->replacer_->Evict(&temp) != 1) {
         this->latch_.unlock();
-        return BasicPageGuard().UpgradeRead() ; // 无法fetch页面
+        return BasicPageGuard().UpgradeRead();  // 无法fetch页面
       }
       page_id_t temp_id;
       for (auto &pair : this->page_table_) {
@@ -392,7 +382,7 @@ auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard
         pages_[temp_id].pin_count_++;
         page_id = temp_id;
         latch_.unlock();
-        return BasicPageGuard(this,&pages_[temp_id]).UpgradeRead() ;
+        return BasicPageGuard(this, &pages_[temp_id]).UpgradeRead();
       }
     }
   } else {
@@ -402,14 +392,13 @@ auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard
     this->replacer_->RecordAccess(it2->second);
     pages_[page_id].pin_count_++;
     latch_.unlock();
-    return BasicPageGuard(this,&pages_[page_id]).UpgradeRead();
+    return BasicPageGuard(this, &pages_[page_id]).UpgradeRead();
   }
   return BasicPageGuard().UpgradeRead();
 }
 
-auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard
-{
-    this->latch_.lock();
+auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
+  this->latch_.lock();
   // int flag=1;
   // auto it=this->page_table_.begin();
   // for(;it!=this->page_table_.end();it++)
@@ -439,12 +428,12 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard
       this->disk_scheduler_->disk_manager_->ReadPage(temp_id, this->pages_[temp_id].data_);
       page_id = temp_id;
       this->latch_.unlock();
-      return BasicPageGuard(this,&pages_[temp_id]).UpgradeWrite();
+      return BasicPageGuard(this, &pages_[temp_id]).UpgradeWrite();
     } else {
       frame_id_t temp = 0;
       if (this->replacer_->Evict(&temp) != 1) {
         this->latch_.unlock();
-        return BasicPageGuard().UpgradeWrite(); // 无法fetch页面
+        return BasicPageGuard().UpgradeWrite();  // 无法fetch页面
       }
       page_id_t temp_id;
       for (auto &pair : this->page_table_) {
@@ -466,7 +455,7 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard
         pages_[temp_id].pin_count_++;
         page_id = temp_id;
         latch_.unlock();
-        return BasicPageGuard(this,&pages_[temp_id]).UpgradeWrite();
+        return BasicPageGuard(this, &pages_[temp_id]).UpgradeWrite();
       }
     }
   } else {
@@ -476,14 +465,13 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard
     this->replacer_->RecordAccess(it2->second);
     pages_[page_id].pin_count_++;
     latch_.unlock();
-    return BasicPageGuard(this,&pages_[page_id]).UpgradeWrite();
+    return BasicPageGuard(this, &pages_[page_id]).UpgradeWrite();
   }
   return BasicPageGuard().UpgradeWrite();
 }
 
-auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard
-{
-    this->latch_.lock();
+auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard {
+  this->latch_.lock();
   if (this->free_list_.empty() == true) {
     int flag = 1;
     auto it = this->page_table_.begin();
@@ -518,7 +506,7 @@ auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard
     *page_id = newid;
     // this->disk_scheduler_->disk_manager_ ->WritePage(newid,this->pages_[newid].data_);
     latch_.unlock();
-    return BasicPageGuard(this,&pages_[newid]);
+    return BasicPageGuard(this, &pages_[newid]);
   } else {
     if (this->replacer_->Evict(&temp) != 1) {
       this->latch_.unlock();
@@ -543,6 +531,7 @@ auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard
     this->replacer_->SetEvictable(temp, false);
     this->replacer_->RecordAccess(temp);
     temp_page->page_id_ = newid;
+    this->page_table_.erase(temp_id);
     Page &new_page = pages_[newid];
     new_page.is_dirty_ = false;
     new_page.pin_count_ = 1;
@@ -551,7 +540,7 @@ auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard
     *page_id = newid;
     this->disk_scheduler_->disk_manager_->WritePage(newid, this->pages_[newid].data_);
     latch_.unlock();
-    return BasicPageGuard(this,&pages_[newid]);
+    return BasicPageGuard(this, &pages_[newid]);
   }
 
   return BasicPageGuard();

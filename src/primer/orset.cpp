@@ -37,21 +37,6 @@ void ORSet<T>::Remove(const T &elem) {
 
 template <typename T>
 void ORSet<T>::Merge(const ORSet<T> &other) {
-  // TODO(student): Implement this
-  // auto it=other.t.begin();
-  // while(it!=other.t.end())
-  // {
-  //   T value=*it.first;
-  //   auto it2=this->e.begin();
-  //   while(it2!=this->e.end())
-  //   {
-  //     if(*it2.first==value)
-  //     {
-  //       it2=this->e.erase(it2);
-  //     }
-  //   }
-  // }
-
   for (auto it = other.t.begin(); it != other.t.end(); it++) {
     T value = (*it).first;
     for (auto it2 = this->e.begin(); it2 != this->e.end();) {

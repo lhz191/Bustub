@@ -3,109 +3,90 @@
 
 namespace bustub {
 
-BasicPageGuard::BasicPageGuard(BasicPageGuard &&that) noexcept
-{
-    this->bpm_=that.bpm_;
-    this->page_=that.page_;
-    this->is_dirty_=that.is_dirty_;
-    that.page_=nullptr;
-    that.bpm_=nullptr;
+BasicPageGuard::BasicPageGuard(BasicPageGuard &&that) noexcept {
+  this->bpm_ = that.bpm_;
+  this->page_ = that.page_;
+  this->is_dirty_ = that.is_dirty_;
+  that.page_ = nullptr;
+  that.bpm_ = nullptr;
 }
-void BasicPageGuard::Drop()
-{
-    this->bpm_->UnpinPage(this->page_->page_id_,this->is_dirty_);///zhegyinggaishiguard  de mudi 页面防护可确保在相应对象超出范围后立即对其进行调用unpin
-    this->bpm_=nullptr;
-    this->page_=nullptr;
-    this->is_dirty_=false;
-}
-
-auto BasicPageGuard::operator=(BasicPageGuard &&that) noexcept -> BasicPageGuard & 
-{ 
-    // that.page_->pin_count_++;
-    // this->bpm_->UnpinPage(this->page_->page_id_,this->page_->is_dirty_);//zhegyinggaishiguard  de mudi 页面防护可确保在相应对象超出范围后立即对其进行调用unpin
-    this->bpm_=that.bpm_;
-    this->page_=that.page_;
-    this->is_dirty_=that.is_dirty_;
-    // this->page_->pin_count_--;//BUQUEDING   ,根据页面保护器的目的
-    return *this; 
+void BasicPageGuard::Drop() {
+  this->bpm_->UnpinPage(
+      this->page_->page_id_,
+      this->is_dirty_);  /// zhegyinggaishiguard  de mudi 页面防护可确保在相应对象超出范围后立即对其进行调用unpin
+  this->bpm_ = nullptr;
+  this->page_ = nullptr;
+  this->is_dirty_ = false;
 }
 
-BasicPageGuard::~BasicPageGuard()
-{
-    // Drop();
-};  // NOLINT
-
-auto BasicPageGuard::UpgradeRead() -> ReadPageGuard 
-{ 
-    ReadPageGuard temp=ReadPageGuard(this->bpm_, this->page_);
-    this->bpm_=nullptr;
-    this->page_=nullptr;
-    this->is_dirty_=false;
-    return temp; 
+auto BasicPageGuard::operator=(BasicPageGuard &&that) noexcept -> BasicPageGuard & {
+  this->bpm_ = that.bpm_;
+  this->page_ = that.page_;
+  this->is_dirty_ = that.is_dirty_;
+  return *this;
 }
 
-auto BasicPageGuard::UpgradeWrite() -> WritePageGuard 
-{ 
-    WritePageGuard temp=WritePageGuard(this->bpm_, this->page_);
-    this->bpm_=nullptr;
-    this->page_=nullptr;
-    this->is_dirty_=false;
-    return temp; 
-}
-ReadPageGuard::ReadPageGuard(BufferPoolManager *bpm, Page *page) 
-{
-    this->guard_.bpm_=bpm;
-    this->guard_.page_=page;
+BasicPageGuard::~BasicPageGuard(){};  //默认析构函数// NOLINT
 
+auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
+  ReadPageGuard temp = ReadPageGuard(this->bpm_, this->page_);
+  this->bpm_ = nullptr;
+  this->page_ = nullptr;
+  this->is_dirty_ = false;
+  return temp;
 }
 
-ReadPageGuard::ReadPageGuard(ReadPageGuard &&that) noexcept
-{
-    this->guard_=BasicPageGuard(std::move(that.guard_));
-    that.guard_.page_=nullptr;
-    that.guard_.bpm_=nullptr;
-    that.guard_.is_dirty_=false;
+auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
+  WritePageGuard temp = WritePageGuard(this->bpm_, this->page_);
+  this->bpm_ = nullptr;
+  this->page_ = nullptr;
+  this->is_dirty_ = false;
+  return temp;
+}
+ReadPageGuard::ReadPageGuard(BufferPoolManager *bpm, Page *page) {
+  this->guard_.bpm_ = bpm;
+  this->guard_.page_ = page;
 }
 
-auto ReadPageGuard::operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard & 
-{
-    this->guard_.Drop();
-    this->guard_=BasicPageGuard(std::move(that.guard_));
-    return *this; 
+ReadPageGuard::ReadPageGuard(ReadPageGuard &&that) noexcept {
+  this->guard_ = BasicPageGuard(std::move(that.guard_));
+  that.guard_.page_ = nullptr;
+  that.guard_.bpm_ = nullptr;
+  that.guard_.is_dirty_ = false;
 }
 
+auto ReadPageGuard::operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard & {
+  this->guard_.Drop();
+  this->guard_ = BasicPageGuard(std::move(that.guard_));
+  return *this;
+}
 
-void ReadPageGuard::Drop() 
-{
-    this->guard_.Drop();// 执行释放 latch 的操作
+void ReadPageGuard::Drop() {
+  this->guard_.Drop();  // 执行释放 latch 的操作
 }
 
 ReadPageGuard::~ReadPageGuard() {}  // NOLINT
 
-WritePageGuard::WritePageGuard(BufferPoolManager *bpm, Page *page) 
-{
-    this->guard_.bpm_=bpm;
-    this->guard_.page_=page;
+WritePageGuard::WritePageGuard(BufferPoolManager *bpm, Page *page) {
+  this->guard_.bpm_ = bpm;
+  this->guard_.page_ = page;
 }
 
-WritePageGuard::WritePageGuard(WritePageGuard &&that) noexcept
-{
-    this->guard_=BasicPageGuard(std::move(that.guard_));
-    that.guard_.page_=nullptr;
-    that.guard_.bpm_=nullptr;
-    that.guard_.is_dirty_=false;
+WritePageGuard::WritePageGuard(WritePageGuard &&that) noexcept {
+  this->guard_ = BasicPageGuard(std::move(that.guard_));
+  that.guard_.page_ = nullptr;
+  that.guard_.bpm_ = nullptr;
+  that.guard_.is_dirty_ = false;
 }
 
-auto WritePageGuard::operator=(WritePageGuard &&that) noexcept -> WritePageGuard & 
-{
-    // this->guard_.Drop();
-    this->guard_=BasicPageGuard(std::move(that.guard_));
-    return *this; 
+auto WritePageGuard::operator=(WritePageGuard &&that) noexcept -> WritePageGuard & {
+  // this->guard_.Drop();
+  this->guard_ = BasicPageGuard(std::move(that.guard_));
+  return *this;
 }
 
-void WritePageGuard::Drop() 
-{
-    this->guard_.Drop();// 执行释放 latch 的操作
+void WritePageGuard::Drop() {
+  this->guard_.Drop();  // 执行释放 latch 的操作
 }
 
 WritePageGuard::~WritePageGuard() {}  // NOLINT

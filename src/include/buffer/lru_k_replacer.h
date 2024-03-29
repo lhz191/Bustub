@@ -36,7 +36,7 @@ class LRUKNode {
   bool is_evictable_{false};
 
  public:
-  bool operator>(LRUKNode &other) {
+  auto operator>(LRUKNode &other) -> bool {
     if ((this->history_.size() >= k_) && other.history_.size() >= k_) {
       auto it1 = history_.begin();
       std::advance(it1, k_ - 1);
@@ -44,10 +44,11 @@ class LRUKNode {
       std::advance(it2, k_ - 1);
       size_t temp1 = this->history_.front() - *it1;
       size_t temp2 = other.history_.front() - *it2;
-      if (temp1 > temp2) {
-        return true;
-      } else
-        return false;
+      // if (temp1 > temp2) {
+      //   return true;
+      // } else
+      //   return false;
+      return temp1>temp2;
     } else if ((this->history_.size() >= k_) && other.history_.size() < k_) {
       return false;
     } else if ((this->history_.size() < k_) && other.history_.size() >= k_) {
