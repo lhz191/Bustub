@@ -56,7 +56,7 @@ class ExtendibleHTableBucketPage {
    * method to set default values
    * @param max_size Max size of the bucket array
    */
-  void Init(uint32_t max_size = HTableBucketArraySize(sizeof(MappingType)));
+  void Init(uint32_t max_size = HTableBucketArraySize(sizeof(std::pair<KeyType, ValueType>)));
 
   /**
    * Lookup a key
@@ -132,9 +132,10 @@ class ExtendibleHTableBucketPage {
   void PrintBucket() const;
 
  private:
+  // using MappingType = std::pair<KeyType, ValueType>;
   uint32_t size_;
   uint32_t max_size_;
-  MappingType array_[HTableBucketArraySize(sizeof(MappingType))];
+  MappingType array_[HTableBucketArraySize(sizeof(std::pair<KeyType, ValueType>))];
 };
 
 }  // namespace bustub

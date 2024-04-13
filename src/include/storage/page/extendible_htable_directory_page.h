@@ -189,7 +189,7 @@ class ExtendibleHTableDirectoryPage {
    */
   void PrintDirectory() const;
 
- private:
+ public:
   uint32_t max_depth_;
   uint32_t global_depth_;
   uint8_t local_depths_[HTABLE_DIRECTORY_ARRAY_SIZE];

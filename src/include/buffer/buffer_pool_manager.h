@@ -172,7 +172,11 @@ class BufferPoolManager {
    * @return false if the page exists but could not be deleted, true if the page didn't exist or deletion succeeded
    */
   auto DeletePage(page_id_t page_id) -> bool;
-
+  /**
+   * @brief Allocate a page on disk. Caller should acquire the latch before calling this function.
+   * @return the id of the allocated page
+   */
+  auto AllocatePage() -> page_id_t;
  private:
   /** Number of pages in the buffer pool. */
   const size_t pool_size_;
@@ -196,11 +200,6 @@ class BufferPoolManager {
   /** This buffer is for the leaderboard task. You may want to use it to optimize the write requests. */
   WriteBackCache write_back_cache_ __attribute__((__unused__));
 
-  /**
-   * @brief Allocate a page on disk. Caller should acquire the latch before calling this function.
-   * @return the id of the allocated page
-   */
-  auto AllocatePage() -> page_id_t;
 
   /**
    * @brief Deallocate a page on disk. Caller should acquire the latch before calling this function.

@@ -11,6 +11,10 @@ BasicPageGuard::BasicPageGuard(BasicPageGuard &&that) noexcept {
   that.bpm_ = nullptr;
 }
 void BasicPageGuard::Drop() {
+  if(page_==nullptr)
+  {
+    return;
+  }
   this->bpm_->UnpinPage(
       this->page_->page_id_,
       this->is_dirty_);  /// zhegyinggaishiguard  de mudi 页面防护可确保在相应对象超出范围后立即对其进行调用unpin
@@ -26,9 +30,12 @@ auto BasicPageGuard::operator=(BasicPageGuard &&that) noexcept -> BasicPageGuard
   return *this;
 }
 
-BasicPageGuard::~BasicPageGuard(){};  //默认析构函数// NOLINT
-
+BasicPageGuard::~BasicPageGuard()
+{
+  // Drop();
+}; 
 auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
+  page_->RLatch();
   ReadPageGuard temp = ReadPageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
   this->page_ = nullptr;
@@ -37,10 +44,15 @@ auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
 }
 
 auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
+  // std::cout<<"jiasuo"<<std::endl;
+  // std::cout<<"weika1"<<std::endl;
+  page_->WLatch();
+  // std::cout<<"weika2"<<std::endl;
   WritePageGuard temp = WritePageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
   this->page_ = nullptr;
   this->is_dirty_ = false;
+  // std::cout<<"weika"<<std::endl;
   return temp;
 }
 ReadPageGuard::ReadPageGuard(BufferPoolManager *bpm, Page *page) {
@@ -62,12 +74,17 @@ auto ReadPageGuard::operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard & 
 }
 
 void ReadPageGuard::Drop() {
+  guard_.page_->RUnlatch();
   this->guard_.Drop();  // 执行释放 latch 的操作
 }
 
-ReadPageGuard::~ReadPageGuard() {}  // NOLINT
+ReadPageGuard::~ReadPageGuard() 
+{
+this->guard_.Drop();
+}
 
 WritePageGuard::WritePageGuard(BufferPoolManager *bpm, Page *page) {
+  // std::cout<<"weika3"<<std::endl;
   this->guard_.bpm_ = bpm;
   this->guard_.page_ = page;
 }
@@ -86,9 +103,14 @@ auto WritePageGuard::operator=(WritePageGuard &&that) noexcept -> WritePageGuard
 }
 
 void WritePageGuard::Drop() {
+  // std::cout<<"jiesuo"<<std::endl;
+  guard_.page_->WUnlatch();
   this->guard_.Drop();  // 执行释放 latch 的操作
 }
 
-WritePageGuard::~WritePageGuard() {}  // NOLINT
+WritePageGuard::~WritePageGuard()
+{
+  this->guard_.Drop();
+}
 
 }  // namespace bustub
