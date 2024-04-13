@@ -40,8 +40,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
     int flag = 1;
     auto it = this->page_table_.begin();
     for (; it != this->page_table_.end(); it++) {
-      if (this->pages_[it->first].pin_count_ ==
-          0) 
+      if (this->pages_[it->first].pin_count_ ==0) 
       {
         flag = 0;
         break;
@@ -343,12 +342,13 @@ auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
       // NOT null,fetch frame and duqu from disk
       frame1 = this->free_list_.front();
       free_list_.pop_front();
-      page_id_t temp_id;
+      page_id_t temp_id=0;
       for (auto &pair : this->page_table_) {
         if (pair.second == frame1) {
           temp_id = pair.first;  // fan hui page_id
         }
       }
+      // std::cout<<temp_id<<std::endl;
       pages_[temp_id].pin_count_++;
       this->replacer_->SetEvictable(frame1, false);
       this->replacer_->RecordAccess(frame1);
@@ -465,6 +465,8 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
     this->replacer_->RecordAccess(it2->second);
     pages_[page_id].pin_count_++;
     latch_.unlock();
+    // std::cout<<"here"<<std::endl;
+    // std::cout<<"weika"<<std::endl;
     return BasicPageGuard(this, &pages_[page_id]).UpgradeWrite();
   }
   return BasicPageGuard().UpgradeWrite();
