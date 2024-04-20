@@ -41,6 +41,9 @@ auto ExtendibleHTableDirectoryPage::GetBucketPageId(uint32_t bucket_idx) const -
 }
 
 void ExtendibleHTableDirectoryPage::SetBucketPageId(uint32_t bucket_idx, page_id_t bucket_page_id) {
+    if (bucket_idx>=HTABLE_DIRECTORY_ARRAY_SIZE) {
+        throw std::invalid_argument("out of bounds");
+  }
   auto count = 1 << global_depth_;
   for (auto idx = 0; idx < count; ++idx) {
       if (bucket_page_ids_[idx] == bucket_page_id) {//之前没有指向page的，local_depth就为0

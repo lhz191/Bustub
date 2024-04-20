@@ -44,15 +44,11 @@ auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
 }
 
 auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
-  // std::cout<<"jiasuo"<<std::endl;
-  // std::cout<<"weika1"<<std::endl;
   page_->WLatch();
-  // std::cout<<"weika2"<<std::endl;
   WritePageGuard temp = WritePageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
   this->page_ = nullptr;
   this->is_dirty_ = false;
-  // std::cout<<"weika"<<std::endl;
   return temp;
 }
 ReadPageGuard::ReadPageGuard(BufferPoolManager *bpm, Page *page) {

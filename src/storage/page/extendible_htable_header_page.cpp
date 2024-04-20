@@ -28,7 +28,7 @@ auto ExtendibleHTableHeaderPage::HashToDirectoryIndex(uint32_t hash) const -> ui
       return 0;
   }
   // return hash&((1<<max_depth_)-1);
-  return hash >> (sizeof(hash)*8 - max_depth_);
+  return hash >> (32-max_depth_);
   //利用位操作技巧将high depth位提取出来
 }
 
