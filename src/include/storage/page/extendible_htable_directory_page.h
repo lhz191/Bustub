@@ -85,7 +85,7 @@ class ExtendibleHTableDirectoryPage {
    * @param bucket_idx the directory index for which to find the split image
    * @return the directory index of the split image
    **/
-  auto GetSplitImageIndex(uint32_t bucket_idx) const -> uint32_t;
+  auto GetSplitImageIndex(uint32_t dict_idx) const -> uint32_t;
 
   /**
    * GetGlobalDepthMask - returns a mask of global_depth 1's and the rest 0's.

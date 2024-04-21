@@ -57,9 +57,9 @@ void ExtendibleHTableDirectoryPage::SetBucketPageId(uint32_t bucket_idx, page_id
   bucket_page_ids_[bucket_idx] = bucket_page_id;
 }
 
-auto ExtendibleHTableDirectoryPage::GetSplitImageIndex(uint32_t bucket_idx) const -> uint32_t
+auto ExtendibleHTableDirectoryPage::GetSplitImageIndex(uint32_t dict_idx) const -> uint32_t
 {
-  return (1 << global_depth_) + bucket_idx;//zhe li global depth是增加（改变）前的!!
+  return (1 << global_depth_) + dict_idx;//zhe li global depth是增加（改变）前的!!
 }
 
 auto ExtendibleHTableDirectoryPage::GetGlobalDepth() const -> uint32_t
