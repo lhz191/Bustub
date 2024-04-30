@@ -384,7 +384,6 @@ void BustubInstance::GenerateTestTable() {
   auto *txn = txn_manager_->Begin();
   auto exec_ctx = MakeExecutorContext(txn, false);
   TableGenerator gen{exec_ctx.get()};
-
   std::shared_lock<std::shared_mutex> l(catalog_lock_);
   gen.GenerateTestTables();
   l.unlock();

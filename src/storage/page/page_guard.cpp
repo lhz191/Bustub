@@ -44,6 +44,7 @@ auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
 }
 
 auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
+  // page_->WUnlatch();
   page_->WLatch();
   WritePageGuard temp = WritePageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
@@ -99,7 +100,6 @@ auto WritePageGuard::operator=(WritePageGuard &&that) noexcept -> WritePageGuard
 }
 
 void WritePageGuard::Drop() {
-  // std::cout<<"jiesuo"<<std::endl;
   guard_.page_->WUnlatch();
   this->guard_.Drop();  // 执行释放 latch 的操作
 }

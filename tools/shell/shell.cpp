@@ -10,6 +10,7 @@
 #include "linenoise/linenoise.h"
 #include "utf8proc/utf8proc.h"
 
+
 auto GetWidthOfUtf8(const void *beg, const void *end, size_t *width) -> int {
   size_t computed_width = 0;
   utf8proc_ssize_t n;
@@ -24,18 +25,16 @@ auto GetWidthOfUtf8(const void *beg, const void *end, size_t *width) -> int {
   *width = computed_width;
   return 0;
 }
-
+// std::cout<<1<<std::endl;
 // NOLINTNEXTLINE
 auto main(int argc, char **argv) -> int {
   ft_set_u8strwid_func(&GetWidthOfUtf8);
 
   auto bustub = std::make_unique<bustub::BustubInstance>("test.db");
-
   auto default_prompt = "bustub> ";
   auto emoji_prompt = "\U0001f6c1> ";  // the bathtub emoji
   bool use_emoji_prompt = false;
   bool disable_tty = false;
-
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "--emoji-prompt") == 0) {
       use_emoji_prompt = true;
@@ -46,15 +45,11 @@ auto main(int argc, char **argv) -> int {
       break;
     }
   }
-
   bustub->GenerateMockTable();
-
   if (bustub->buffer_pool_manager_ != nullptr) {
     bustub->GenerateTestTable();
   }
-
   bustub->EnableManagedTxn();
-
   std::cout << "Welcome to the BusTub shell! Type \\help to learn more." << std::endl << std::endl;
 
   linenoiseHistorySetMaxLen(1024);

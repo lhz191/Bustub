@@ -460,13 +460,13 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
     }
   } else {
     // find!!!
+
     page_id = it2->first;
     this->replacer_->SetEvictable(it2->second, false);
     this->replacer_->RecordAccess(it2->second);
     pages_[page_id].pin_count_++;
     latch_.unlock();
     // std::cout<<"here"<<std::endl;
-    // std::cout<<"weika"<<std::endl;
     return BasicPageGuard(this, &pages_[page_id]).UpgradeWrite();
   }
   return BasicPageGuard().UpgradeWrite();
