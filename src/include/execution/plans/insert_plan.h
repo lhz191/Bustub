@@ -48,13 +48,14 @@ class InsertPlanNode : public AbstractPlanNode {
     BUSTUB_ASSERT(GetChildren().size() == 1, "Insert should have only one child plan.");
     return GetChildAt(0);
   }
+  /** @return true if we embed insert values directly into the plan, false if we have a child plan providing tuples */
+  bool IsRawInsert() const { return GetChildren().size() ==0; }
 
   BUSTUB_PLAN_NODE_CLONE_WITH_CHILDREN(InsertPlanNode);
 
   /** The table to be inserted into. */
   table_oid_t table_oid_;
 
- protected:
   auto PlanNodeToString() const -> std::string override { return fmt::format("Insert {{ table_oid={} }}", table_oid_); }
 };
 

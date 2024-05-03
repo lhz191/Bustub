@@ -460,7 +460,6 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
     }
   } else {
     // find!!!
-
     page_id = it2->first;
     this->replacer_->SetEvictable(it2->second, false);
     this->replacer_->RecordAccess(it2->second);

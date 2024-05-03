@@ -45,6 +45,7 @@ auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
 
 auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
   // page_->WUnlatch();
+  std::cout<<"weika"<<std::endl;
   page_->WLatch();
   WritePageGuard temp = WritePageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
@@ -100,13 +101,22 @@ auto WritePageGuard::operator=(WritePageGuard &&that) noexcept -> WritePageGuard
 }
 
 void WritePageGuard::Drop() {
+  dropped_ = true;
   guard_.page_->WUnlatch();
   this->guard_.Drop();  // 执行释放 latch 的操作
 }
 
 WritePageGuard::~WritePageGuard()
 {
+  // guard_.page_->WUnlatch();
   this->guard_.Drop();
+        // if (!dropped_) {
+        //     guard_.page_->WUnlatch();
+        //     // guard_.Drop();
+        // }
+        // else{
+        //   // guard_.Drop();
+        // }
 }
 
 }  // namespace bustub

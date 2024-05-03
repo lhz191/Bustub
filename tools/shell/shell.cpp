@@ -56,7 +56,7 @@ auto main(int argc, char **argv) -> int {
   linenoiseSetMultiLine(1);
 
   auto prompt = use_emoji_prompt ? emoji_prompt : default_prompt;
-
+// std::cout<<1<<std::endl;
   while (true) {
     std::string query;
     bool first_line = true;

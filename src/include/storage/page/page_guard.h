@@ -102,7 +102,7 @@ class BasicPageGuard {
     return reinterpret_cast<T *>(GetDataMut());
   }
 
- public:
+
   friend class ReadPageGuard;
   friend class WritePageGuard;
 
@@ -233,9 +233,9 @@ class WritePageGuard {
     return guard_.AsMut<T>();
   }
 
- public:
   // You may choose to get rid of this and add your own private variables.
   BasicPageGuard guard_;
+  bool dropped_ = false;
 };
 
 }  // namespace bustub
