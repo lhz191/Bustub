@@ -348,7 +348,6 @@ auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
           temp_id = pair.first;  // fan hui page_id
         }
       }
-      // std::cout<<temp_id<<std::endl;
       pages_[temp_id].pin_count_++;
       this->replacer_->SetEvictable(frame1, false);
       this->replacer_->RecordAccess(frame1);
@@ -465,7 +464,6 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
     this->replacer_->RecordAccess(it2->second);
     pages_[page_id].pin_count_++;
     latch_.unlock();
-    // std::cout<<"here"<<std::endl;
     return BasicPageGuard(this, &pages_[page_id]).UpgradeWrite();
   }
   return BasicPageGuard().UpgradeWrite();

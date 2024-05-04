@@ -41,8 +41,7 @@ TableHeap::TableHeap(bool create_table_heap) : bpm_(nullptr) {}
 auto TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tuple, LockManager *lock_mgr, Transaction *txn,
                             table_oid_t oid) -> std::optional<RID> {
   std::unique_lock<std::mutex> guard(latch_);
-  std::cout<<"jas"<<std::endl;
-  std::cout<<last_page_id_<<std::endl;
+  // guard.unlock();
   auto page_guard = bpm_->FetchPageWrite(last_page_id_);
   while (true) {
     auto page = page_guard.AsMut<TablePage>();
@@ -67,17 +66,13 @@ auto TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tuple, LockManag
     next_page_guard.guard_.page_->WLatch();//zhe li shi yin wei auto next_page_guard = WritePageGuard{bpm_, npg};zheli gou zao这里构造函数不会返回值，他却返回了，导致根本没有上锁
     last_page_id_ = next_page_id;
     page_guard = std::move(next_page_guard);
-    std::cout<<"step1"<<std::endl;
   }
   auto last_page_id = last_page_id_;
   auto page = page_guard.AsMut<TablePage>();
   // page_guard.guard_.page_->WLatch();
   // auto page_guard1 = bpm_->FetchPageWrite(last_page_id);
-  std::cout<<3<<std::endl;
   auto slot_id = *page->InsertTuple(meta, tuple);
   // only allow one insertion at a time, otherwise it will deadlock.
-  std::cout<<"step2"<<std::endl;
-  std::cout<<last_page_id<<std::endl;
   guard.unlock();
 
 #ifndef DISABLE_LOCK_MANAGER
@@ -94,6 +89,7 @@ void TableHeap::UpdateTupleMeta(const TupleMeta &meta, RID rid) {
   auto page_guard = bpm_->FetchPageWrite(rid.GetPageId());
   auto page = page_guard.AsMut<TablePage>();
   page->UpdateTupleMeta(meta, rid);
+  page_guard.Drop();
 }
 
 auto TableHeap::GetTuple(RID rid) -> std::pair<TupleMeta, Tuple> {
@@ -101,12 +97,14 @@ auto TableHeap::GetTuple(RID rid) -> std::pair<TupleMeta, Tuple> {
   auto page = page_guard.As<TablePage>();
   auto [meta, tuple] = page->GetTuple(rid);
   tuple.rid_ = rid;
+  page_guard.Drop();
   return std::make_pair(meta, std::move(tuple));
 }
 
 auto TableHeap::GetTupleMeta(RID rid) -> TupleMeta {
   auto page_guard = bpm_->FetchPageRead(rid.GetPageId());
   auto page = page_guard.As<TablePage>();
+  page_guard.Drop();
   return page->GetTupleMeta(rid);
 }
 
@@ -114,7 +112,6 @@ auto TableHeap::MakeIterator() -> TableIterator {
   std::unique_lock<std::mutex> guard(latch_);
   auto last_page_id = last_page_id_;
   guard.unlock();
-
   auto page_guard = bpm_->FetchPageRead(last_page_id);
   auto page = page_guard.As<TablePage>();
   auto num_tuples = page->GetNumTuples();

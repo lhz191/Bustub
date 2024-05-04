@@ -45,7 +45,6 @@ auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
 
 auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
   // page_->WUnlatch();
-  std::cout<<"weika"<<std::endl;
   page_->WLatch();
   WritePageGuard temp = WritePageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
@@ -82,7 +81,6 @@ this->guard_.Drop();
 }
 
 WritePageGuard::WritePageGuard(BufferPoolManager *bpm, Page *page) {
-  // std::cout<<"weika3"<<std::endl;
   this->guard_.bpm_ = bpm;
   this->guard_.page_ = page;
 }

@@ -102,7 +102,6 @@ class BasicPageGuard {
     return reinterpret_cast<T *>(GetDataMut());
   }
 
-
   friend class ReadPageGuard;
   friend class WritePageGuard;
 
