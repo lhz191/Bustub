@@ -47,7 +47,7 @@ auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool{
         old_meta.is_deleted_ = true;
                 // 更新索引
         if(old_meta.is_deleted_){
-          std::cout<<"yes"<<std::endl;
+          // std::cout<<"yes"<<std::endl;
         }
         table_info->table_->UpdateTupleMeta(old_meta, child_tuple->GetRid());
         // plan_->target_expressions_

@@ -83,10 +83,8 @@ class Schema {
 
   /** @return the indices of non-inlined columns */
   auto GetUnlinedColumns() const -> const std::vector<uint32_t> & { return uninlined_columns_; }
-
   /** @return the number of columns in the schema for the tuple */
   auto GetColumnCount() const -> uint32_t { return static_cast<uint32_t>(columns_.size()); }
-
   /** @return the number of non-inlined columns */
   auto GetUnlinedColumnCount() const -> uint32_t { return static_cast<uint32_t>(uninlined_columns_.size()); }
 
@@ -99,7 +97,7 @@ class Schema {
   /** @return string representation of this schema */
   auto ToString(bool simplified = true) const -> std::string;
 
- private:
+//  private:
   /** Fixed-length column size, i.e. the number of bytes used by one tuple. */
   uint32_t length_;
 

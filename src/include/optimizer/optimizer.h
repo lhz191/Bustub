@@ -11,7 +11,7 @@
 #include "concurrency/transaction.h"
 #include "execution/expressions/abstract_expression.h"
 #include "execution/plans/abstract_plan.h"
-
+#include "execution/executors/index_scan_executor.h"
 namespace bustub {
 
 /**
@@ -110,9 +110,11 @@ class Optimizer {
   /** Catalog will be used during the planning process. USERS SHOULD ENSURE IT OUTLIVES
    * OPTIMIZER, otherwise it's a dangling reference.
    */
+  
   const Catalog &catalog_;
-
+  ExecutorContext *exec_ctx;
   const bool force_starter_rule_;
+  bustub::TableInfo *table_info;
 };
 
 }  // namespace bustub

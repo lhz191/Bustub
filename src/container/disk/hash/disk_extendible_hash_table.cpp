@@ -96,6 +96,7 @@ auto DiskExtendibleHashTable<K, V, KC>::GetValue(const K &key, std::vector<V> *r
         return false;
     }
     auto bucket_page = this->bpm_->FetchPageRead(bucket_id);
+    // std::cout<<"alsotrue1"<<std::endl;
     auto bucket = reinterpret_cast<const ExtendibleHTableBucketPage<K, V, KC>*>(bucket_page.GetData());
     //zhe li ying gai xuyao fan hui suoyou fuhe de V
     //no!!This semester you will only need to support unique key-value pairs.!!

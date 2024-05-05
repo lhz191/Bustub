@@ -7,12 +7,15 @@ namespace bustub {
 
 auto Optimizer::Optimize(const AbstractPlanNodeRef &plan) -> AbstractPlanNodeRef {
   if (force_starter_rule_) {
+    // std::cout<<"flag11"<<std::endl;
     // Use starter rules when `force_starter_rule_` is set to true.
     auto p = plan;
     p = OptimizeMergeProjection(p);
     p = OptimizeMergeFilterNLJ(p);
+    //  std::cout<<"flag11k"<<std::endl;
     p = OptimizeOrderByAsIndexScan(p);
     p = OptimizeSortLimitAsTopN(p);
+    //  std::cout<<"flag112"<<std::endl;
     p = OptimizeMergeFilterScan(p);
     p = OptimizeSeqScanAsIndexScan(p);
     return p;

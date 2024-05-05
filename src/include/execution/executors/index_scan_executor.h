@@ -19,7 +19,7 @@
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/index_scan_plan.h"
 #include "storage/table/tuple.h"
-
+#include "execution/executors/seq_scan_executor.h"
 namespace bustub {
 
 /**
@@ -44,5 +44,19 @@ class IndexScanExecutor : public AbstractExecutor {
  private:
   /** The index scan plan node to be executed. */
   const IndexScanPlanNode *plan_;
+  TableInfo *table_info;
+  std::unique_ptr<AbstractExecutor> child_executor_;
+  bool changed= false;
+  std::unique_ptr<Tuple> child_tuple;
+  std::unique_ptr<RID> child_rid;
+  Tuple next_tuple;
+  TupleMeta tuple_meta;
+  const char* data;
+  std::unique_ptr<TupleMeta> meta;
+  std::unique_ptr<TableIterator> table_iterator_;
+  IndexInfo * index_info_;
+  HashTableIndexForTwoIntegerColumn *htable_;
+  std::vector<RID> rids_;
+  std::vector<RID>::iterator rid_iter_;
 };
 }  // namespace bustub

@@ -196,7 +196,6 @@ class Catalog {
     if (meta == tables_.end()) {
       return NULL_TABLE_INFO;
     }
-
     return (meta->second).get();
   }
 

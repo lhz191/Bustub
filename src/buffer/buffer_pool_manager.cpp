@@ -106,7 +106,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
     latch_.unlock();
     return &pages_[newid];
   }
-
+latch_.unlock();
   return nullptr;
 }
 
@@ -170,6 +170,7 @@ auto BufferPoolManager::FetchPage(page_id_t page_id, [[maybe_unused]] AccessType
     latch_.unlock();
     return &pages_[page_id];
   }
+  latch_.unlock();
   return nullptr;
 }
 
@@ -195,6 +196,7 @@ auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty, [[maybe_unus
     latch_.unlock();
     return true;
   }
+  latch_.unlock();
   return false;
 }
 
@@ -245,6 +247,7 @@ auto BufferPoolManager::DeletePage(page_id_t page_id) -> bool {
       return true;
     }
   }
+  latch_.unlock();
   return true;
 }
 
@@ -320,11 +323,13 @@ auto BufferPoolManager::FetchPageBasic(page_id_t page_id) -> BasicPageGuard {
     latch_.unlock();
     return BasicPageGuard(this, &pages_[page_id]);
   }
+  latch_.unlock();
   return BasicPageGuard();
 }
 
 auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
   this->latch_.lock();
+
   // int flag=1;
   // auto it=this->page_table_.begin();
   // for(;it!=this->page_table_.end();it++)
@@ -385,14 +390,17 @@ auto BufferPoolManager::FetchPageRead(page_id_t page_id) -> ReadPageGuard {
       }
     }
   } else {
+    // std::cout<<"f2"<<std::endl;
     // find!!!
     page_id = it2->first;
     this->replacer_->SetEvictable(it2->second, false);
     this->replacer_->RecordAccess(it2->second);
+    // std::cout<<"f3"<<std::endl;
     pages_[page_id].pin_count_++;
     latch_.unlock();
     return BasicPageGuard(this, &pages_[page_id]).UpgradeRead();
   }
+  latch_.unlock();
   return BasicPageGuard().UpgradeRead();
 }
 
@@ -466,6 +474,7 @@ auto BufferPoolManager::FetchPageWrite(page_id_t page_id) -> WritePageGuard {
     latch_.unlock();
     return BasicPageGuard(this, &pages_[page_id]).UpgradeWrite();
   }
+  latch_.unlock();
   return BasicPageGuard().UpgradeWrite();
 }
 
@@ -541,7 +550,7 @@ auto BufferPoolManager::NewPageGuarded(page_id_t *page_id) -> BasicPageGuard {
     latch_.unlock();
     return BasicPageGuard(this, &pages_[newid]);
   }
-
+latch_.unlock();
   return BasicPageGuard();
 }
 

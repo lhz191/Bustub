@@ -54,7 +54,6 @@ auto DeleteExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool
         // plan_->target_expressions_
         // plan_->
         std::vector<IndexInfo *> index_info = exec_ctx_->GetCatalog()->GetTableIndexes(table_info->name_);
-        std::cout<<index_info.size()<<std::endl;
         for (const auto &index : index_info) {
             Tuple key_tuple = child_tuple->KeyFromTuple(table_info->schema_, index->key_schema_,
                                                        index->index_->GetMetadata()->GetKeyAttrs());
