@@ -82,6 +82,8 @@ auto DiskExtendibleHashTable<K, V, KC>::GetValue(const K &key, std::vector<V> *r
     // std::cout<<"dict_id"<<dict_id<<std::endl;
     if(dict_id==INVALID_PAGE_ID)
     {
+        header_page.Drop();
+        // std::cout<<"alsotrue1"<<std::endl;
         return false;
     }
     header_page.Drop();  // 不 drop 一直有锁
@@ -93,6 +95,7 @@ auto DiskExtendibleHashTable<K, V, KC>::GetValue(const K &key, std::vector<V> *r
     dict_page.Drop();
     if(dict_id==INVALID_PAGE_ID)
     {
+        //   std::cout<<"alsotrue2"<<std::endl;
         return false;
     }
     auto bucket_page = this->bpm_->FetchPageRead(bucket_id);
@@ -100,9 +103,17 @@ auto DiskExtendibleHashTable<K, V, KC>::GetValue(const K &key, std::vector<V> *r
     auto bucket = reinterpret_cast<const ExtendibleHTableBucketPage<K, V, KC>*>(bucket_page.GetData());
     //zhe li ying gai xuyao fan hui suoyou fuhe de V
     //no!!This semester you will only need to support unique key-value pairs.!!
-    V result1;
-    if (bucket->Lookup(key, result1, this->cmp_)) {
-        result->push_back(result1);
+    // V result1;
+    // if (bucket->Lookup(key, result1, this->cmp_)) {
+    //     result->push_back(result1);
+    //     std::cout<<"bucket_page.PageId()"<<bucket_page.PageId()<<std::endl;
+    //     bucket_page.Drop();
+    //     return true;
+    // }
+    // std::vector<V> *result1;
+        if (bucket->Lookup1(key, *result, this->cmp_)) {
+        // result->push_back(result1);
+        // std::cout<<"bucket_page.PageId()"<<bucket_page.PageId()<<std::endl;
         bucket_page.Drop();
         return true;
     }
@@ -118,7 +129,7 @@ template <typename K, typename V, typename KC>
 auto DiskExtendibleHashTable<K, V, KC>::Insert(const K &key, const V &value, Transaction *transaction) -> bool {
     // std::cout<<"flag1"<<std::endl;
     uint32_t hash = this->Hash(key);
-    // std::cout<<"hash:"<<hash<<std::endl;
+    // std::cout<<"insert_hash:"<<hash<<std::endl;
     // 读取头部页面
     auto header_page = this->bpm_->FetchPageWrite(header_page_id_);
     // std::cout<<"flag2"<<std::endl;
@@ -132,6 +143,7 @@ auto DiskExtendibleHashTable<K, V, KC>::Insert(const K &key, const V &value, Tra
     // std::cout<<"dict_id:"<<dict_id<<std::endl;
     header_page.Drop();  
     if (dict_id == INVALID_PAGE_ID) {
+        // std::cout<<"rhasdsadsad"<<std::endl;
         // 如果目录页面还未创建,则创建一个新的目录页面和桶页面
             // bucket_page.Drop();
             // dict_page.Drop();
@@ -231,7 +243,6 @@ auto DiskExtendibleHashTable<K, V, KC>::Insert(const K &key, const V &value, Tra
         // bucket_page.Drop();
         // bucket_page = this->bpm_->FetchPageWrite(bucket_id);
         // bucket = reinterpret_cast<ExtendibleHTableBucketPage<K, V, KC> *>(bucket_page.GetDataMut());
-    // 在拆分完成后,重新尝试插入键值对
     }
     bool success = bucket->Insert(key, value, this->cmp_);
     bucket_page.Drop();

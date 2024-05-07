@@ -45,6 +45,7 @@ auto DeleteExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool
     // 从子执行器获取需要gengxin的元组
     while (child_executor_->Next(child_tuple.get(), child_rid.get())) {
       // exec_ctx_->
+    //   std::cout<<"________________-init________________"<<std::endl;
         TupleMeta old_meta = table_info->table_->GetTupleMeta(child_tuple->GetRid());
         old_meta.is_deleted_ = true;
                 // 更新索引
@@ -57,8 +58,9 @@ auto DeleteExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool
         for (const auto &index : index_info) {
             Tuple key_tuple = child_tuple->KeyFromTuple(table_info->schema_, index->key_schema_,
                                                        index->index_->GetMetadata()->GetKeyAttrs());
-            index->index_->InsertEntry(key_tuple, *child_rid, exec_ctx_->GetTransaction());
+            index->index_->DeleteEntry(key_tuple, *child_rid, exec_ctx_->GetTransaction());
         }
+        // std::cout<<"________________-end________________"<<std::endl;
         insert_count++;
     }
 

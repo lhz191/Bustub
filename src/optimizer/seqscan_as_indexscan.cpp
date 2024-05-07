@@ -18,7 +18,6 @@ auto Optimizer::OptimizeSeqScanAsIndexScan(const bustub::AbstractPlanNodeRef &pl
     // std::cout<<"------------"<<optimized_plan->children_.size() == 1<<std::endl;
     if(plan->GetChildren().size()>1)
     {
-        std::cout<<"------------"<<std::endl;
         return plan;
     }
     for (const auto &child : plan->GetChildren()) {
@@ -34,10 +33,8 @@ auto Optimizer::OptimizeSeqScanAsIndexScan(const bustub::AbstractPlanNodeRef &pl
     // 3. 检查是否存在过滤谓词
     if (seq_scan->filter_predicate_ == nullptr) {
         // 没有过滤谓词，无法优化为 IndexScan
-        // std::cout<<3<<std::endl;
         return optimized_plan;
     }
-  //  std::cout<<(exec_ctx== nullptr)<<std::endl;
     // 4. 检查过滤谓词是否可以利用索引
     table_info = catalog_.GetTable(seq_scan->table_name_);
     std::vector<IndexInfo *> indexes = catalog_.GetTableIndexes(seq_scan->table_name_);
@@ -58,30 +55,66 @@ auto Optimizer::OptimizeSeqScanAsIndexScan(const bustub::AbstractPlanNodeRef &pl
                 // std::cout<<"table_info->schema_.GetColumn(i).GetName()"<<table_info->schema_.GetColumn(i).GetName()<<std::endl;
                 // if (key_schema.GetColumn(i).GetName() == table_info->schema_.GetColumn(i).GetName()) {
                     usable_index.push_back(index);
+                    
                     break;
                 }
             }
         }
-
+    // for(size_t i=0;i<usable_index.size();i++)
+    // {
+    //     std::cout<<"i:"<<usable_index[i]->index_oid_<<std::endl;
+    // }
     if (usable_index.size() == 0) {
         // 没有合适的索引，无法优化为 IndexScan
         // std::cout<<2<<std::endl;
         return optimized_plan;
     }
-
+    if((seq_scan->filter_predicate_->children_.size()==0)||(seq_scan->filter_predicate_->children_[1]->ToString())[1]=='#')
+    {
+        return optimized_plan;
+    }
+    size_t index_to_use=0;
+    // if(index_to_use)
+    // {
+        
+    // }
+    int flag=1;
+    for(size_t i=0;i<usable_index.size();i++)
+    {
+        // std::cout<<"i:"<<usable_index[i]->index_oid_<<std::endl;
+        // std::cout<<"(static_cast<int>(usable_index[i]->index_oid_))"<<(int)(((seq_scan->filter_predicate_->children_[0]->ToString())[3])-'0')<<std::endl;
+        // std::cout<<"(usable_index[i]->index_oid_)==((seq_scan->filter_predicate_->children_[0]->ToString())[3])"<<((seq_scan->filter_predicate_->children_[0]->ToString())[3])<<std::endl;
+        // std::cout<<((static_cast<int>(usable_index[i]->index_oid_))==(int)(((seq_scan->filter_predicate_->children_[0]->ToString())[3])-'0'))<<std::endl;
+        if((static_cast<int>(usable_index[i]->index_oid_))==(int)(((seq_scan->filter_predicate_->children_[0]->ToString())[3])-'0'))
+        {
+            // std::cout<<"find!"<<std::endl;
+            index_to_use=i;
+            // std::cout<<"usable_index[i]->index_oid_"<<usable_index[i]->index_oid_<<std::endl;
+            flag=0;
+            break;
+        }
+    }
+    if(flag==1)
+    {
+        return optimized_plan;
+    }
     // 5. 创建新的 IndexScanPlanNode
 // auto index_scan = std::make_unique<IndexScanPlanNode>(
 //     seq_scan->output_schema_, table_info->oid_, usable_index->index_oid_,
 //     seq_scan->filter_predicate_);
-
+// std::cout<<"seq_scan->filter_predicate_->children_"<<seq_scan->filter_predicate_->children_[0]->ToString()<<std::endl;
+//     std::cout<<"(seq_scan->filter_predicate_->children_[1]->ToString())[0]"<<(seq_scan->filter_predicate_->children_[0]->ToString())[4]<<std::endl;
+// std::cout<<"seq_scan->filter_predicate_->children_"<<seq_scan->filter_predicate_->children_[1]->ToString()<<std::endl;
+//     std::cout<<"(seq_scan->filter_predicate_->children_[1]->ToString())[0]"<<(seq_scan->filter_predicate_->children_[1]->ToString())[4]<<std::endl;
+// usable_index.find(seq_scan->filter_predicate_->children_[0]->ToString()[3])
 //     // 6. 将过滤谓词推送到 IndexScanPlanNode
 //     index_scan->filter_predicate_ = seq_scan->filter_predicate_;
     auto index_scan = std::make_shared<IndexScanPlanNode>(
-        seq_scan->output_schema_, table_info->oid_, usable_index[0]->index_oid_,
+        seq_scan->output_schema_, table_info->oid_, usable_index[index_to_use]->index_oid_,
         seq_scan->filter_predicate_, nullptr);
+        // std::cout<<"weika"<<std::endl;
     index_scan->filter_predicate_ = seq_scan->filter_predicate_;
     index_scan->children_ = std::move(optimized_children);
-// std::cout<<12323<<std::endl;
 
        // 6. 将 unique_ptr 转换为 shared_ptr 再转换为 AbstractPlanNode
     // return index_scan;

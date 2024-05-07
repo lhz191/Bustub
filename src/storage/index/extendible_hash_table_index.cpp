@@ -36,8 +36,9 @@ template <typename KeyType, typename ValueType, typename KeyComparator>
 void HASH_TABLE_INDEX_TYPE::ScanKey(const Tuple &key, std::vector<RID> *result, Transaction *transaction) {
   // construct scan index key
   KeyType index_key;
+  // std::cout<<"flag1"<<key.ToString(sch)<<std::endl;
   index_key.SetFromKey(key);
-
+// std::cout<<"flag2"<<std::endl;
   container_.GetValue(index_key, result, transaction);
 }
 template class ExtendibleHashTableIndex<GenericKey<4>, RID, GenericComparator<4>>;

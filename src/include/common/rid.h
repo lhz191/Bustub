@@ -60,7 +60,6 @@ class RID {
 
   auto operator==(const RID &other) const -> bool { return page_id_ == other.page_id_ && slot_num_ == other.slot_num_; }
 
- private:
   page_id_t page_id_{INVALID_PAGE_ID};
   uint32_t slot_num_{0};  // logical offset from 0, 1...
 };

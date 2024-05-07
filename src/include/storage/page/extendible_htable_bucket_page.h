@@ -68,6 +68,8 @@ class ExtendibleHTableBucketPage {
    */
   auto Lookup(const KeyType &key, ValueType &value, const KeyComparator &cmp) const -> bool;
 
+  auto Lookup1(const KeyType &key, std::vector<ValueType>& value, const KeyComparator &cmp)const -> bool;
+
   /**
    * Attempts to insert a key and value in the bucket.
    *

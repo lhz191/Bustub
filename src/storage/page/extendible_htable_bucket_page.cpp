@@ -33,6 +33,7 @@ void ExtendibleHTableBucketPage<K, V, KC>::Init(uint32_t max_size) {
 template <typename K, typename V, typename KC>
 auto ExtendibleHTableBucketPage<K, V, KC>::Lookup(const K &key, V &value, const KC &cmp) const -> bool 
 {
+  // std::cout<<"!!!!!!!!"<<std::endl;
   for(uint32_t i=0;i<size_;i++)
   {
     if(!cmp(key,array_[i].first))
@@ -43,7 +44,23 @@ auto ExtendibleHTableBucketPage<K, V, KC>::Lookup(const K &key, V &value, const 
   }
   return false;
 }
-
+template <typename K, typename V, typename KC>
+auto ExtendibleHTableBucketPage<K, V, KC>::Lookup1(const K &key, std::vector<V>& value, const KC& cmp) const-> bool {
+  // for(uint32_t j = 0; j < size_; j++)
+  // {
+  //    std::cout<<"array_[j]"<<array_[j].first<<array_[j].second<<std::endl;
+  // }
+    for (uint32_t i = 0; i < size_; i++) {
+        if (!cmp(key, array_[i].first)) {
+          // std::cout<<"array_[i]"<<array_[i].first<<array_[i].second<<std::endl;
+            value.push_back(array_[i].second);
+        }
+    }
+    if (!value.empty()) {
+        return true;
+    }
+        return false;
+}
 template <typename K, typename V, typename KC>
 auto ExtendibleHTableBucketPage<K, V, KC>::Insert(const K &key, const V &value, const KC &cmp) -> bool {
   // std::cout<<"this->size_"<<this->size_<<std::endl;
@@ -63,13 +80,13 @@ auto ExtendibleHTableBucketPage<K, V, KC>::Insert(const K &key, const V &value, 
   {
     return false;
   }
-  for(uint32_t i=0;i<size_;i++)
-  {
-    if(!cmp(key,array_[i].first))
-    {
-      return false;
-    }
-  }
+  // for(uint32_t i=0;i<size_;i++)
+  // {
+  //   if(!cmp(key,array_[i].first))
+  //   {
+  //     return false;
+  //   }
+  // }
   // std::cout<<"ture"<<std::endl;
   this->array_[size_]=std::make_pair(key, value);
   size_++;

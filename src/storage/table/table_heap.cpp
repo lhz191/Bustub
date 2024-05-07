@@ -82,6 +82,7 @@ auto TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tuple, LockManag
   }
 #endif
   page_guard.Drop();
+  // std::cout<<"last_page_id"<<last_page_id<<std::endl;
   return RID(last_page_id, slot_id);
 }
 
@@ -93,7 +94,10 @@ void TableHeap::UpdateTupleMeta(const TupleMeta &meta, RID rid) {
 }
 
 auto TableHeap::GetTuple(RID rid) -> std::pair<TupleMeta, Tuple> {
+  // std::cout<<"weika3"<<std::endl;
+    // std::cout<<rid.GetPageId()<<std::endl;
   auto page_guard = bpm_->FetchPageRead(rid.GetPageId());
+  // std::cout<<"weika4"<<std::endl;
   auto page = page_guard.As<TablePage>();
   auto [meta, tuple] = page->GetTuple(rid);
   tuple.rid_ = rid;

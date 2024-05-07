@@ -35,7 +35,9 @@ BasicPageGuard::~BasicPageGuard()
   // Drop();
 }; 
 auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
+    // std::cout<<"rjiasuo"<<std::endl;
   page_->RLatch();
+
   ReadPageGuard temp = ReadPageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
   this->page_ = nullptr;
@@ -45,6 +47,7 @@ auto BasicPageGuard::UpgradeRead() -> ReadPageGuard {
 
 auto BasicPageGuard::UpgradeWrite() -> WritePageGuard {
   // page_->WUnlatch();
+  // std::cout<<"wjiasuo"<<std::endl;
   page_->WLatch();
   WritePageGuard temp = WritePageGuard(this->bpm_, this->page_);
   this->bpm_ = nullptr;
@@ -71,6 +74,7 @@ auto ReadPageGuard::operator=(ReadPageGuard &&that) noexcept -> ReadPageGuard & 
 }
 
 void ReadPageGuard::Drop() {
+  // std::cout<<"rjiesuo"<<std::endl;
   guard_.page_->RUnlatch();
   this->guard_.Drop();  // 执行释放 latch 的操作
 }
@@ -99,6 +103,7 @@ auto WritePageGuard::operator=(WritePageGuard &&that) noexcept -> WritePageGuard
 }
 
 void WritePageGuard::Drop() {
+    // std::cout<<"wjiesuo"<<std::endl;
   dropped_ = true;
   guard_.page_->WUnlatch();
   this->guard_.Drop();  // 执行释放 latch 的操作

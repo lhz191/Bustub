@@ -40,7 +40,10 @@ void IndexScanExecutor::Init() {
 for (const auto &child_expr : plan_->filter_predicate_->children_) {
     const auto *right_expr = dynamic_cast<const ConstantValueExpression *>(child_expr.get());
     if (right_expr != nullptr) {
+        // std::cout<<right_expr->ToString()<<"right_expr->ToString()"<<std::endl;
+        // std::cout<<"cishu:"<<1<<std::endl;
         Value v = right_expr->val_;
+        // std::cout<<"v________________"<<v.GetTypeId()<<std::endl;
         index_key_values.push_back(v);
     }
 }
@@ -49,6 +52,7 @@ for (const auto &child_expr : plan_->filter_predicate_->children_) {
         // 扫描索引并获取 RID 列表
     htable_->ScanKey(index_key_tuple, &rids_, exec_ctx_->GetTransaction());
     rid_iter_ = rids_.begin();
+    
 }
 
 auto IndexScanExecutor::Next(Tuple *tuple, RID *rid) -> bool {
@@ -56,6 +60,7 @@ auto IndexScanExecutor::Next(Tuple *tuple, RID *rid) -> bool {
      {
         return false;
      }
+    //  std::cout<<"rids_.size()"<<rids_.size()<<std::endl;
      if(rids_.size()==0)
      {
         // SeqScanExecutor.Nest(tuple,rid);
@@ -64,7 +69,16 @@ auto IndexScanExecutor::Next(Tuple *tuple, RID *rid) -> bool {
      }
      while (rid_iter_ != rids_.end()) {
         // 检查当前RID是否被删除
+        // std::cout<<"weika1"<<std::endl;
+        // std::cout<<(*rid_iter_).GetPageId()<<std::endl;
+        // if((*rid_iter_).GetPageId()==-1)
+        // {
+        //     rid_iter_->page_id_=11;
+        // }
         tuple_meta = table_info->table_->GetTuple(*rid_iter_).first;
+        // std::cout<<"tuple_meta"<<(table_info->table_->GetTuple(*rid_iter_).second).ToString(&table_info->schema_)<<std::endl;
+        // std::cout<<"weika2"<<std::endl;
+        // std::cout<<(*rid_iter_).ToString()<<std::endl;
         if (!tuple_meta.is_deleted_) {
             // 更新输出参数
             *tuple = table_info->table_->GetTuple(*rid_iter_).second;

@@ -39,26 +39,19 @@ auto InsertExecutor::Next(Tuple *tuple, RID *rid) -> bool {
         return false;
     }
     changed = true;
-    // std::cout<<"me"<<std::endl;
     int insert_count = 0;
     // 从子执行器获取需要插入的元组
     while (child_executor_->Next(child_tuple.get(), child_rid.get())) {
-        // std::cout<<"1"<<std::endl;
-        // 从 tuple 获取 TupleMeta
-        // data = child_tuple->GetData();
-        // std::cout << data << std::endl;
-        // memcpy(meta, data, sizeof(TupleMeta));
-        // 将元组插入到表中
-        // std::cout<<"8S1"<<std::endl;
-        table_info->table_->InsertTuple(*meta, *child_tuple, exec_ctx_->GetLockManager(), exec_ctx_->GetTransaction(), table_info->oid_);
-        // std::cout<<"8S"<<std::endl;
+        std::optional<RID> new_rid = table_info->table_->InsertTuple(*meta, *child_tuple, exec_ctx_->GetLockManager(), exec_ctx_->GetTransaction(), table_info->oid_);
+        table_info->table_->UpdateTupleMeta(*meta,new_rid.value());
         // 更新索引
         std::vector<IndexInfo *> index_info = exec_ctx_->GetCatalog()->GetTableIndexes(table_info->name_);
+        // std::cout<<"index_info.size()"<<index_info.size()<<std::endl;
         for (const auto &index : index_info) {
-            std::cout<<"3"<<std::endl;
+            // std::cout<<"___________________________3_______________________-"<<std::endl;
             Tuple key_tuple = child_tuple->KeyFromTuple(table_info->schema_, index->key_schema_,
                                                        index->index_->GetMetadata()->GetKeyAttrs());
-            index->index_->InsertEntry(key_tuple, *child_rid, exec_ctx_->GetTransaction());
+            index->index_->InsertEntry(key_tuple, *new_rid, exec_ctx_->GetTransaction());
         }
         insert_count++;
     }

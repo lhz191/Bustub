@@ -346,10 +346,10 @@ class Catalog {
     if (table_names_.find(table_name) == table_names_.end()) {
       return std::vector<IndexInfo *>{};
     }
-   std::cout<<11<<std::endl;
+  //  std::cout<<11<<std::endl;
     auto table_indexes = index_names_.find(table_name);
     BUSTUB_ASSERT((table_indexes != index_names_.end()), "Broken Invariant");
-std::cout<<table_indexes->second.size()<<std::endl;
+// std::cout<<table_indexes->second.size()<<std::endl;
     std::vector<IndexInfo *> indexes{};
     indexes.reserve(table_indexes->second.size());
     for (const auto &index_meta : table_indexes->second) {

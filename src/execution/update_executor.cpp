@@ -52,20 +52,25 @@ auto UpdateExecutor::Next([[maybe_unused]] Tuple *tuple, RID *rid) -> bool{
         table_info->table_->UpdateTupleMeta(old_meta, child_tuple->GetRid());
         // plan_->target_expressions_
         // plan_->
+      // std::cout<<"______________________init_________________"<<std::endl;
       std::vector<Value> new_values;
       for (const auto &expr : plan_->target_expressions_) {
           Value new_value = expr->Evaluate(child_tuple.get(), table_info->schema_);
+          // std::cout<<"new_value.ToString()"<<new_value.ToString()<<std::endl;
           new_values.push_back(new_value);
       }
        Tuple newtuple=Tuple(new_values, &table_info->schema_);
-        table_info->table_->InsertTuple(*meta, newtuple, exec_ctx_->GetLockManager(), exec_ctx_->GetTransaction(), table_info->oid_);
+        std::optional<RID> new_rid = table_info->table_->InsertTuple(*meta, newtuple, exec_ctx_->GetLockManager(), exec_ctx_->GetTransaction(), table_info->oid_);
+        // std::cout<<"new_rid.value()"<<new_rid.value()<<std::endl;
+        // std::cout<<"child_rid.value()"<<child_tuple->GetRid()<<std::endl;
+        // std::cout<<"______________________end_________________"<<std::endl;
         std::vector<IndexInfo *> index_info = exec_ctx_->GetCatalog()->GetTableIndexes(table_info->name_);
-        std::cout<<index_info.size()<<std::endl;
+        // std::cout<<index_info.size()<<std::endl;
         for (const auto &index : index_info) {
-          std::cout<<3<<std::endl;
-            Tuple key_tuple = child_tuple->KeyFromTuple(table_info->schema_, index->key_schema_,
+          // std::cout<<"_______________3_________"<<(index->index_->GetMetadata()->GetKeyAttrs())[0]<<std::endl;
+            Tuple key_tuple = newtuple.KeyFromTuple(table_info->schema_, index->key_schema_,
                                                        index->index_->GetMetadata()->GetKeyAttrs());
-            index->index_->InsertEntry(key_tuple, *child_rid, exec_ctx_->GetTransaction());
+            index->index_->InsertEntry(key_tuple, *new_rid, exec_ctx_->GetTransaction());
         }
         insert_count++;
     }
