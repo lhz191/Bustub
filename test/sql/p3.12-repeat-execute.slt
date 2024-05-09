@@ -33,7 +33,7 @@ select * from __mock_table_123, (select count(*) as cnt from t1);
 # GroupAgg as the right child
 
 query rowsort +ensure:nlj_init_check
-select * from __mock_table_123, (select distinct v2 from t1);
+select * from __mock_table_123, (select v2 from t1);
 ----
 1 🥰🥰 
 1 🥰 

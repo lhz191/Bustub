@@ -48,6 +48,25 @@ class Value {
   friend class VectorType;
 
  public:
+  // bool operator==(const Value& other) const {
+  //   if (this->type_id_ != other.type_id_) {
+  //     return false;
+  //   }
+
+  //   switch (this->type_id_) {
+  //     case TypeId::TINYINT:
+  //       return this->GetAs<int8_t>() == other.GetAs<int8_t>();
+  //     case TypeId::SMALLINT:
+  //       return this->GetAs<int16_t>() == other.GetAs<int16_t>();
+  //     case TypeId::INTEGER:
+  //       return this->GetAs<int32_t>() == other.GetAs<int32_t>();
+  //     case TypeId::BIGINT:
+  //       return this->GetAs<int64_t>() == other.GetAs<int64_t>();
+  //     default:
+  //       return false;
+  //   }
+  //   return false;
+  // }
   explicit Value(const TypeId type) : manage_data_(false), type_id_(type) { size_.len_ = BUSTUB_VALUE_NULL; }
   // BOOLEAN and TINYINT
   Value(TypeId type, int8_t i);

@@ -19,8 +19,10 @@
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/hash_join_plan.h"
 #include "storage/table/tuple.h"
+#include "common/util/hash_util.h"
 
 namespace bustub {
+  using HashJoinKey = std::vector<Value>;
 
 /**
  * HashJoinExecutor executes a nested-loop JOIN on two tables.
@@ -54,6 +56,15 @@ class HashJoinExecutor : public AbstractExecutor {
  private:
   /** The HashJoin plan node to be executed. */
   const HashJoinPlanNode *plan_;
+  /** The left child executor */
+  std::unique_ptr<AbstractExecutor> left_executor_;
+  /** The right child executor */
+  std::unique_ptr<AbstractExecutor> right_executor_;
+
+  std::unordered_map<hash_t, std::vector<Tuple>> hashtable_;
+  std::vector<Tuple>::const_iterator iter_;
+  std::queue<Tuple> results_;
+  // bool changed=false;
 };
 
 }  // namespace bustub
