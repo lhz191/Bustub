@@ -63,5 +63,7 @@ class TopNExecutor : public AbstractExecutor {
   const TopNPlanNode *plan_;
   /** The child executor from which tuples are obtained */
   std::unique_ptr<AbstractExecutor> child_executor_;
+    /** 用于存储前 N 个元组的优先队列 */
+  std::priority_queue<std::pair<std::vector<Value>, Tuple>> top_entries_;
 };
 }  // namespace bustub
