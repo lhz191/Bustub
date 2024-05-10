@@ -19,7 +19,9 @@
 #include "execution/executors/abstract_executor.h"
 #include "execution/plans/window_plan.h"
 #include "storage/table/tuple.h"
-
+#include "execution/plans/aggregation_plan.h"
+#include "type/value_factory.h"
+#include"execution/executors/aggregation_executor.h"
 namespace bustub {
 
 /**
@@ -90,5 +92,46 @@ class WindowFunctionExecutor : public AbstractExecutor {
 
   /** The child executor from which tuples are obtained */
   std::unique_ptr<AbstractExecutor> child_executor_;
+
+  auto MakeAggregateKey(const Tuple *tuple, std::vector<AbstractExpressionRef> &group_bys) -> AggregateKey {
+    std::vector<Value> keys;
+    for (const auto &expr : group_bys) {
+      keys.emplace_back(expr->Evaluate(tuple, this->GetOutputSchema()));
+    }
+    return {keys};
+  }
+
+  auto MakeAggregateValue(const Tuple *tuple, AbstractExpressionRef &agg_expr) -> AggregateValue {
+    std::vector<Value> vals;
+    vals.emplace_back(agg_expr->Evaluate(tuple, this->GetOutputSchema()));
+    return {vals};
+  }
+
+  auto Equal(
+    const Tuple &a, 
+    const Tuple &b, 
+    const std::vector<std::pair<OrderByType, AbstractExpressionRef>> &order_bys_
+  ) -> bool {
+    for (auto &[order_by_type, expr] : order_bys_) {
+      auto a_val = expr->Evaluate(&a, this->GetOutputSchema());
+      auto b_val = expr->Evaluate(&b, this->GetOutputSchema());
+
+      switch(order_by_type) {
+        case OrderByType::INVALID: // NOLINT
+        case OrderByType::DEFAULT: // NOLINT
+        case OrderByType::DESC:
+          if (a_val.CompareEquals(b_val) == CmpBool::CmpTrue) return true;
+          break;
+        case OrderByType::ASC: 
+          if (a_val.CompareEquals(b_val) == CmpBool::CmpTrue) return true;
+          break;
+      }
+    }
+    return false;
+  }
+  std::vector<Tuple> tuples;
+  std::vector<Tuple> result_tuples;
+
+  std::vector<Tuple>::iterator it_;
 };
 }  // namespace bustub

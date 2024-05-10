@@ -64,7 +64,15 @@ class WindowFunctionPlanNode : public AbstractPlanNode {
                          std::vector<std::vector<std::pair<OrderByType, AbstractExpressionRef>>> order_bys,
                          std::vector<AbstractExpressionRef> functions,
                          std::vector<WindowFunctionType> window_func_types)
-      : AbstractPlanNode(std::move(output_schema), {std::move(child)}), columns_(std::move(columns)) {
+      : AbstractPlanNode(std::move(output_schema), 
+      {std::move(child)}), columns_(std::move(columns)),
+      window_func_indexes(window_func_indexes),
+      columns(columns),
+      partition_bys(partition_bys),
+      order_bys(order_bys),
+      functions(functions),
+      window_func_types(window_func_types)
+      {
     for (uint32_t i = 0; i < window_func_indexes.size(); i++) {
       window_functions_[window_func_indexes[i]] =
           WindowFunction{functions[i], window_func_types[i], partition_bys[i], order_bys[i]};
@@ -94,7 +102,13 @@ class WindowFunctionPlanNode : public AbstractPlanNode {
   /** all columns expressions */
   std::vector<AbstractExpressionRef> columns_;
 
+  std::vector<uint32_t> window_func_indexes;
   std::unordered_map<uint32_t, WindowFunction> window_functions_;
+  std::vector<AbstractExpressionRef> columns;
+  std::vector<std::vector<AbstractExpressionRef>> partition_bys;
+  std::vector<std::vector<std::pair<OrderByType, AbstractExpressionRef>>> order_bys;
+  std::vector<AbstractExpressionRef> functions;
+  std::vector<WindowFunctionType> window_func_types;
 
  protected:
   auto PlanNodeToString() const -> std::string override;
