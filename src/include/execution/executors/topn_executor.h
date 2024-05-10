@@ -24,6 +24,35 @@
 
 namespace bustub {
 
+struct Comparer {
+  explicit Comparer(const TopNPlanNode *plan) : plan_(plan) {}
+  auto operator()(const Tuple &a, const Tuple &b) -> bool {
+    for (auto &order_by : plan_->GetOrderBy()) {
+      auto a_key = order_by.second->Evaluate(&a, *plan_->output_schema_);
+      auto b_key = order_by.second->Evaluate(&b, *plan_->output_schema_);
+      if (order_by.first == OrderByType::ASC || order_by.first == OrderByType::DEFAULT) {
+        if (a_key.CompareLessThan(b_key) == CmpBool::CmpTrue) {
+          return true;
+        }
+        if (a_key.CompareGreaterThan(b_key) == CmpBool::CmpTrue) {
+          return false;
+        }
+      } else if (order_by.first == OrderByType::DESC) {
+        if (a_key.CompareGreaterThan(b_key) == CmpBool::CmpTrue) {
+          return true;
+        }
+        if (a_key.CompareLessThan(b_key) == CmpBool::CmpTrue) {
+          return false;
+        }
+      }
+    }
+    return false;
+  }
+
+ private:
+  const TopNPlanNode *plan_;
+};
+
 /**
  * The TopNExecutor executor executes a topn.
  */
@@ -64,6 +93,8 @@ class TopNExecutor : public AbstractExecutor {
   /** The child executor from which tuples are obtained */
   std::unique_ptr<AbstractExecutor> child_executor_;
     /** 用于存储前 N 个元组的优先队列 */
-  std::priority_queue<std::pair<std::vector<Value>, Tuple>> top_entries_;
+  std::priority_queue<Tuple, std::vector<Tuple>, Comparer> top_entries_;
+
+  std::vector<Tuple> res_;
 };
 }  // namespace bustub

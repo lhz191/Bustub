@@ -22,12 +22,12 @@ BufferPoolManager::BufferPoolManager(size_t pool_size, DiskManager *disk_manager
                                      LogManager *log_manager)
     : pool_size_(pool_size), disk_scheduler_(std::make_unique<DiskScheduler>(disk_manager)), log_manager_(log_manager) {
   // we allocate a consecutive memory space for the buffer pool
-  pages_ = new Page[pool_size_ + 20];
+  pages_ = new Page[pool_size_ + 5020];
 
-  replacer_ = std::make_unique<LRUKReplacer>(pool_size, replacer_k);
+  replacer_ = std::make_unique<LRUKReplacer>(pool_size+5000, replacer_k);
 
   // Initially, every page is in the free list.
-  for (size_t i = 0; i < pool_size_; ++i) {
+  for (size_t i = 0; i < pool_size_+5000; ++i) {
     free_list_.emplace_back(static_cast<int>(i));
   }
 }
@@ -47,6 +47,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
       }
     }
     if (flag == 1) {
+      std::cout<<"returnthis"<<std::endl;
       this->latch_.unlock();
       return nullptr;
     }
@@ -73,6 +74,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
   } else {
     if (this->replacer_->Evict(&temp) != 1) {
       this->latch_.unlock();
+      std::cout<<"returnthis2"<<std::endl;
       return nullptr;  // 无法创建新页面
     }
     page_id_t temp_id;
@@ -107,6 +109,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
     return &pages_[newid];
   }
 latch_.unlock();
+std::cout<<"returnthis1"<<std::endl;
   return nullptr;
 }
 
@@ -176,6 +179,7 @@ auto BufferPoolManager::FetchPage(page_id_t page_id, [[maybe_unused]] AccessType
 
 auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty, [[maybe_unused]] AccessType access_type) -> bool {
   latch_.lock();
+  std::cout<<"unpin"<<std::endl;
   auto it = this->page_table_.find(page_id);
   if (it == page_table_.end()) {
     latch_.unlock();

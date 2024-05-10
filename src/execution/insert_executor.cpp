@@ -29,6 +29,7 @@ InsertExecutor::InsertExecutor(ExecutorContext *exec_ctx, const InsertPlanNode *
 }
 
 void InsertExecutor::Init() {
+    std::cout<<"________________"<<std::endl;
     table_info = exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid());
     child_executor_->Init();
 }
@@ -42,7 +43,9 @@ auto InsertExecutor::Next(Tuple *tuple, RID *rid) -> bool {
     int insert_count = 0;
     // 从子执行器获取需要插入的元组
     while (child_executor_->Next(child_tuple.get(), child_rid.get())) {
+        std::cout<<"cishu"<<insert_count<<std::endl;
         std::optional<RID> new_rid = table_info->table_->InsertTuple(*meta, *child_tuple, exec_ctx_->GetLockManager(), exec_ctx_->GetTransaction(), table_info->oid_);
+        std::cout<<"mal"<<std::endl;
         table_info->table_->UpdateTupleMeta(*meta,new_rid.value());
         // 更新索引
         std::vector<IndexInfo *> index_info = exec_ctx_->GetCatalog()->GetTableIndexes(table_info->name_);

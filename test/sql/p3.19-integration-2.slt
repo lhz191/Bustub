@@ -82,7 +82,7 @@ INSERT INTO tmp SELECT * FROM (
 statement ok
 INSERT INTO result SELECT * FROM tmp; DELETE FROM tmp; SELECT count(*) FROM result;
 
-query rowsort +explain:o
+query rowsort +explain:oxx
 -- 3rd neighbor
 INSERT INTO tmp SELECT * FROM (
     SELECT

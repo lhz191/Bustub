@@ -158,7 +158,9 @@ auto Optimizer::OptimizeNLJAsHashJoin(const AbstractPlanNodeRef &plan) -> Abstra
         return optimized_plan;
       }
     } else if (const auto *expr = dynamic_cast<const ComparisonExpression *>(nlj_plan.Predicate().get())) {
+      std::cout<<"flag222"<<std::endl;
       if (OptimizeSingleExpression(expr, nlj_plan, left_exprs, right_exprs)) {
+        std::cout<<"flag222"<<std::endl;
         return std::make_shared<HashJoinPlanNode>(nlj_plan.output_schema_, nlj_plan.GetLeftPlan(),
                                                   nlj_plan.GetRightPlan(), std::move(left_exprs),
                                                   std::move(right_exprs), nlj_plan.GetJoinType());

@@ -34,12 +34,13 @@ void AggregationExecutor::Init()
     // std::cout<<results[0]<<std::endl;
   child_executor_->Init();
   aht_.Clear();
-//   std::cout<<"121:"<<plan_->GetAggregates().size()<<std::endl;
-if (plan_->GetAggregates().size() == 0) {
-    // std::cout<<"flag2"<<std::endl;
-    // aht_.GenerateInitialAggregateValue();
-        return;
-    }
+  std::cout<<"121:"<<plan_->GetAggregates().size()<<std::endl;
+  // std::cout<<plan_->GetAggregates().
+// if (plan_->GetAggregates().size() == 0) {
+//     std::cout<<"flag2"<<std::endl;
+//     // aht_.GenerateInitialAggregateValue();
+//         return;
+//     }
    // 遍历子执行器,将结果插入到哈希表中
   while (child_executor_->Next(child_tuple.get(), child_rid.get())) {
     aht_.InsertCombine(MakeAggregateKey(child_tuple.get()), MakeAggregateValue(child_tuple.get()));
@@ -60,7 +61,7 @@ auto AggregationExecutor::Next(Tuple *tuple, RID *rid) -> bool
     }
     // std::cout<<"flag3"<<std::endl;
     if(changed==false){
-          // std::cout<<"flag4"<<std::endl;
+          std::cout<<"flag4"<<std::endl;
 AggregateValue initial_values = aht_.GenerateInitialAggregateValue();
             *tuple = Tuple{initial_values.aggregates_, &GetOutputSchema()};
             changed=true;

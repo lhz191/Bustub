@@ -56,7 +56,7 @@ auto TableHeap::InsertTuple(const TupleMeta &meta, const Tuple &tuple, LockManag
     BUSTUB_ENSURE(next_page_id != INVALID_PAGE_ID, "cannot allocate page");
 
     page->SetNextPageId(next_page_id);
-
+    // bpm_->UnpinPage(next_page_id,true);
     auto next_page = reinterpret_cast<TablePage *>(npg->GetData());
     next_page->Init();
 
