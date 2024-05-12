@@ -62,7 +62,6 @@ class HashJoinExecutor : public AbstractExecutor {
   std::unique_ptr<AbstractExecutor> right_executor_;
 
   std::unordered_map<hash_t, std::vector<Tuple>> hashtable_;
-  std::vector<Tuple>::const_iterator iter_;
   std::queue<Tuple> results_;
   // bool changed=false;
 };

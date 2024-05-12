@@ -47,7 +47,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
       }
     }
     if (flag == 1) {
-      std::cout<<"returnthis"<<std::endl;
+      // std::cout<<"returnthis"<<std::endl;
       this->latch_.unlock();
       return nullptr;
     }
@@ -74,7 +74,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
   } else {
     if (this->replacer_->Evict(&temp) != 1) {
       this->latch_.unlock();
-      std::cout<<"returnthis2"<<std::endl;
+      // std::cout<<"returnthis2"<<std::endl;
       return nullptr;  // 无法创建新页面
     }
     page_id_t temp_id;
@@ -109,7 +109,7 @@ auto BufferPoolManager::NewPage(page_id_t *page_id) -> Page * {
     return &pages_[newid];
   }
 latch_.unlock();
-std::cout<<"returnthis1"<<std::endl;
+// std::cout<<"returnthis1"<<std::endl;
   return nullptr;
 }
 
@@ -179,7 +179,7 @@ auto BufferPoolManager::FetchPage(page_id_t page_id, [[maybe_unused]] AccessType
 
 auto BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty, [[maybe_unused]] AccessType access_type) -> bool {
   latch_.lock();
-  std::cout<<"unpin"<<std::endl;
+  // std::cout<<"unpin"<<std::endl;
   auto it = this->page_table_.find(page_id);
   if (it == page_table_.end()) {
     latch_.unlock();

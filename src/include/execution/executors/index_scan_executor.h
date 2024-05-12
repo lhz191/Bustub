@@ -51,8 +51,6 @@ class IndexScanExecutor : public AbstractExecutor {
   std::unique_ptr<RID> child_rid;
   Tuple next_tuple;
   TupleMeta tuple_meta;
-  const char* data;
-  std::unique_ptr<TupleMeta> meta;
   std::unique_ptr<TableIterator> table_iterator_;
   IndexInfo * index_info_;
   HashTableIndexForTwoIntegerColumn *htable_;

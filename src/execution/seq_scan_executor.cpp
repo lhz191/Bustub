@@ -16,12 +16,10 @@ namespace bustub {
 
 SeqScanExecutor::SeqScanExecutor(ExecutorContext *exec_ctx, const SeqScanPlanNode *plan) : AbstractExecutor(exec_ctx), plan_(plan) 
 {
-    // std::cout<<"p22"<<std::endl;
     table_info = exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid());
     if (table_info == Catalog::NULL_TABLE_INFO) {
         throw std::runtime_error("Table not found in catalog");
     }
-    // std::cout<<"p33"<<std::endl;
     // Create a table iterator from the table heap
     table_iterator_ = std::make_unique<TableIterator>(table_info->table_->MakeIterator());
 }

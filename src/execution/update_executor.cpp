@@ -22,7 +22,6 @@ UpdateExecutor::UpdateExecutor(ExecutorContext *exec_ctx, const UpdatePlanNode *
       child_executor_(std::move(child_executor)),
       child_tuple(std::make_unique<Tuple>()),
       child_rid(std::make_unique<RID>()),
-      data(nullptr),
     meta(std::make_unique<TupleMeta>()) {
     table_info = exec_ctx_->GetCatalog()->GetTable(plan_->GetTableOid());
 }

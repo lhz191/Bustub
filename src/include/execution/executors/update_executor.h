@@ -69,7 +69,6 @@ class UpdateExecutor : public AbstractExecutor {
   bool changed= false;
   std::unique_ptr<Tuple> child_tuple;
   std::unique_ptr<RID> child_rid;
-  const char* data;
   std::unique_ptr<TupleMeta> meta;
 
 };
