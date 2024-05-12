@@ -11,9 +11,8 @@ SortExecutor::SortExecutor(ExecutorContext *exec_ctx, const SortPlanNode *plan,
 
 void SortExecutor::Init()
 {
+    // 初始化子执行器
     child_executor_->Init();
-        // 初始化子执行器
-
     // 从子执行器获取所有元组,并存储在 sorted_tuples_ 向量中
     Tuple tuple;
     RID rid;

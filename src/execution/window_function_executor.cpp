@@ -115,7 +115,7 @@ void WindowFunctionExecutor::Init() {
 
         for (auto &[func_column_idx, window_function] : this->plan_->window_functions_) {
             //对于每一个列
-            std::cout<<"func_column_idx"<<func_column_idx<<std::endl;
+            // std::cout<<"func_column_idx"<<func_column_idx<<std::endl;
             // Collect partition_by and order_by for this window func
             std::vector<std::pair<OrderByType, AbstractExpressionRef>> total_orders{};
             std::vector<std::pair<OrderByType, AbstractExpressionRef>> partition_orders{};
@@ -192,15 +192,12 @@ void WindowFunctionExecutor::Init() {
                             aht.InsertCombine(agg_key, agg_value);
                         }
                     }
-                    /* Aggregation loop */
                     for (auto it = lower_bound_iter; it != upper_bound_iter; ++it) {
                         auto result_tuple_it = this->result_tuples.begin() + std::distance(this->tuples.begin(), it);
                         if (!window_function.order_by_.empty()) {
                             auto agg_value_inner = MakeAggregateValue(&(*it), agg_expr);
                             aht.InsertCombine(agg_key, agg_value_inner);
                         }
-
-                        /* Start */
                         std::vector<Value> values{};
                         for (uint32_t idx = 0; idx < this->GetOutputSchema().GetColumns().size(); idx++) {
                            //If it is this window function column, the value is the aggregation value
@@ -226,8 +223,6 @@ void WindowFunctionExecutor::Init() {
                                 values.push_back(default_value);
                             }
                         }
-                        /* END */
-
                         if (result_tuple_it < this->result_tuples.end()) {
                             *result_tuple_it = Tuple{values, &this->GetOutputSchema()};
                         } else 
